@@ -17,9 +17,9 @@ interface Configuration extends WebpackConfiguration {
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 const config: Configuration = {
-  name: 'sleact_font',
+  name: 'sleact_front',
   mode: isDevelopment ? 'development' : 'production',
-  devtool: isDevelopment ? 'hidden-source-map' : 'inline-source-map',
+  devtool: !isDevelopment ? 'hidden-source-map' : 'eval',
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
@@ -32,7 +32,7 @@ const config: Configuration = {
     },
   },
   entry: {
-    app: './client.tsx',
+    app: './client',
   },
   module: {
     rules: [
@@ -51,6 +51,11 @@ const config: Configuration = {
             '@babel/preset-react',
             '@babel/preset-typescript',
           ],
+          env: {
+            development: {
+              plugins: [require.resolve('react-refresh/babel')],
+            },
+          },
         },
         exclude: join(__dirname, 'node_modules'),
       },
@@ -61,7 +66,7 @@ const config: Configuration = {
     ],
   },
   plugins: [
-    new ForkTsCheckerWebpackPlugin({ async: false }),
+    new ForkTsCheckerWebpackPlugin({ async: false }), //ts, webpack 작업을 동시에
     new EnvironmentPlugin({ NODE_ENV: isDevelopment ? 'development' : 'production' }),
   ],
   output: {
@@ -70,7 +75,7 @@ const config: Configuration = {
     publicPath: '/dist/',
   },
   devServer: {
-    historyApiFallback: true,
+    historyApiFallback: true, //react router
     port: 3090,
     devMiddleware: { publicPath: '/dist/' },
     static: { directory: resolve(__dirname) },
