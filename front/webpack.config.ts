@@ -16,10 +16,12 @@ interface Configuration extends WebpackConfiguration {
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+console.log('MODE::isDevelopment=', isDevelopment);
+
 const config: Configuration = {
   name: 'sleact_front',
   mode: isDevelopment ? 'development' : 'production',
-  devtool: !isDevelopment ? 'hidden-source-map' : 'eval',
+  devtool: !isDevelopment ? 'hidden-source-map' : 'eval-source-map',
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
@@ -53,7 +55,10 @@ const config: Configuration = {
           ],
           env: {
             development: {
-              plugins: [require.resolve('react-refresh/babel')],
+              plugins: [['@emotion', { sourceMap: true }], require.resolve('react-refresh/babel')],
+            },
+            production: {
+              plugins: ['@emotion'],
             },
           },
         },

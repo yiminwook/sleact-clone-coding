@@ -1,16 +1,27 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LogIn from '@pages/LogIn/index';
-import SignUp from '@pages/SignUp/index';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import loadable from '@loadable/component';
+import { Link } from 'react-router-dom';
+
+const SignIn = loadable(() => import('@pages/SignIn/index'));
+const SignUp = loadable(() => import('@pages/SignUp/index'));
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<LogIn />} />
-      <Route path="/signup" element={<SignUp />} />
-      {/* <Route path="*" element={}></Route> */}
-    </Routes>
+    <div>
+      <div>
+        <Link to={'/signin'}>SignIn</Link>
+      </div>
+      <div>
+        <Link to={'/signup'}>SignUp</Link>
+      </div>
+      <Routes>
+        <Route path="/" element={<Navigate to="/signin" replace />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        {/* <Route path="*" element={}></Route> */}
+      </Routes>
+    </div>
   );
 };
 
