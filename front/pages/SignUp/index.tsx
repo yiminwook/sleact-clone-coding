@@ -2,7 +2,8 @@ import useInput from '@hooks/useInput';
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from './styles';
+import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@pages/SignUp/styles';
+import getAxiosErrMsg from '@utils/getAxiosErrMsg';
 
 const SignUp = () => {
   const [email, onChangeEmail] = useInput('');
@@ -41,8 +42,8 @@ const SignUp = () => {
         }
       } catch (error) {
         if (error instanceof AxiosError) {
-          const errorMsg = (error as AxiosError<string>).response?.data ?? 'Unknown Error';
-          setSignupErrMsg(() => errorMsg);
+          const errMsg = getAxiosErrMsg(error);
+          setSignupErrMsg(() => errMsg);
         }
       }
     },
@@ -50,8 +51,8 @@ const SignUp = () => {
   );
 
   return (
-    <div id="container">
-      <Header>sleact</Header>
+    <section id="container">
+      <Header>Sleact</Header>
       <Form onSubmit={onSubmit}>
         <Label id="email-label">
           <span>이메일 주소</span>
@@ -91,9 +92,9 @@ const SignUp = () => {
       </Form>
       <LinkContainer>
         이미 회원이신가요?&nbsp;
-        <Link to="/login">로그인하러가기</Link>
+        <Link to="/signin">로그인하러가기</Link>
       </LinkContainer>
-    </div>
+    </section>
   );
 };
 
