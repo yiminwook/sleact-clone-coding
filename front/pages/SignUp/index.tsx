@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@pages/SignUp/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
 
-const SignUp = () => {
+const SignUpPage = () => {
   const [email, onChangeEmail] = useInput('');
   const [nickname, onChangeNickname] = useInput('');
   const [password, setPassword] = useState('');
@@ -41,6 +41,7 @@ const SignUp = () => {
           setSignupSuccess(() => true);
         }
       } catch (error) {
+        console.error(error);
         if (error instanceof AxiosError) {
           const errMsg = getAxiosErrMsg(error);
           setSignupErrMsg(() => errMsg);
@@ -98,4 +99,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUpPage;
