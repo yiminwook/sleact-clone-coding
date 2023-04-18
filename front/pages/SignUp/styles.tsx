@@ -88,6 +88,7 @@ export const Error = styled.div`
 
 export const Success = styled.div`
   color: #2eb67d;
+  margin: 0 0 16px;
   font-weight: bold;
 `;
 

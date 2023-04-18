@@ -1,19 +1,22 @@
 import useInput from '@hooks/useInput';
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Header, Label, Form, Input, LinkContainer, Button, Error } from './styles';
+import axios, { AxiosError } from 'axios';
+import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from './styles';
 
 const SignUp = () => {
   const [email, onChangeEmail] = useInput('');
   const [nickname, onChangeNickname] = useInput('');
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
-  const [misMatchError, setMisMatchError] = useState(false);
+  const [misMatchErr, setMisMatchErr] = useState(false);
+  const [signUpErrMsg, setSignupErrMsg] = useState('');
+  const [signUpSuccess, setSignupSuccess] = useState(false);
 
   const onChangePassoword = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setPassword(e.target.value);
-      setMisMatchError(() => e.target.value !== passwordCheck);
+      setMisMatchErr(() => e.target.value !== passwordCheck);
     },
     [passwordCheck],
   );
@@ -21,18 +24,27 @@ const SignUp = () => {
   const onChangePasswordCheck = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setPasswordCheck(e.target.value);
-      setMisMatchError(() => e.target.value !== password);
+      setMisMatchErr(() => e.target.value !== password);
     },
     [password],
   );
 
   const onSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (misMatchError === false) {
-        console.log('서버로 전송');
+      setSignupErrMsg(() => '');
+      setSignupSuccess(() => false);
+      try {
+        if (misMatchErr === false) {
+          await axios.post('/api/users', { email, nickname, password });
+          setSignupSuccess(() => true);
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          const errorMsg = (error as AxiosError<string>).response?.data ?? 'Unknown Error';
+          setSignupErrMsg(() => errorMsg);
+        }
       }
-      console.log(email, nickname, password, passwordCheck);
     },
     [email, nickname, password, passwordCheck],
   );
@@ -71,7 +83,9 @@ const SignUp = () => {
               onChange={onChangePasswordCheck}
             />
           </div>
-          {misMatchError ? <Error>비밀번호가 일치하지 않습니다.</Error> : null}
+          {misMatchErr ? <Error>비밀번호가 일치하지 않습니다.</Error> : null}
+          {signUpErrMsg !== '' ? <Error>{signUpErrMsg}</Error> : null}
+          {signUpSuccess ? <Success>회원가입이 되었습니다! 로그인하러가기</Success> : null}
         </Label>
         <Button type="submit">회원가입</Button>
       </Form>

@@ -33,13 +33,13 @@ if (prod) {
   app.use(hpp());
 } else {
   app.use(morgan("dev"));
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-      webSocket: true,
-    })
-  );
+  // app.use(
+  // cors({
+  //   origin: true,
+  //   credentials: true,
+  //   webSocket: true,
+  // })
+  // );
 }
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
