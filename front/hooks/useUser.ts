@@ -24,7 +24,7 @@ const useUser = () => {
     errorRetryInterval: 500,
     errorRetryCount: 3,
   };
-  const { data, mutate, isLoading } = useSWR('/api/users', fetcher<userDataType | boolean>(), options);
+  const { data, mutate, isLoading } = useSWR('/api/users', fetcher<userDataType | false>(), options);
   return { data, mutate, isLoading };
 };
 

@@ -18,7 +18,7 @@ const SignInPage = () => {
       setSignInErrMsg(() => '');
       try {
         if (email && password) {
-          const signinResult: AxiosResponse<userDataType | boolean> = await axios.post(
+          const signinResult: AxiosResponse<userDataType | false> = await axios.post(
             '/api/users/login',
             { email, password },
             { withCredentials: true },
