@@ -4,7 +4,8 @@ import React, { FormEvent, useCallback, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Header, Label, Form, Input, LinkContainer, Button, Error } from '@pages/SignUp/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
-import useUser, { userDataType } from '@hooks/useUser';
+import useUser from '@hooks/useUser';
+import { IUser } from '@typings/db';
 
 const SignInPage = () => {
   const [email, onChangeEmail] = useInput('');
@@ -18,7 +19,7 @@ const SignInPage = () => {
       setSignInErrMsg(() => '');
       try {
         if (email && password) {
-          const signinResult: AxiosResponse<userDataType | false> = await axios.post(
+          const signinResult: AxiosResponse<IUser | false> = await axios.post(
             '/api/users/login',
             { email, password },
             { withCredentials: true },
