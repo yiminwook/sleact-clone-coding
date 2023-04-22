@@ -1,11 +1,11 @@
-import Workspace from '@layouts/Workspace';
 import React from 'react';
+import { Container, Header } from '@pages/Channel/styles';
 
 const ChannelPage = () => {
   return (
-    <Workspace>
-      <div>ChannelPage</div>
-    </Workspace>
+    <Container>
+      <Header>channel page</Header>
+    </Container>
   );
 };
 
