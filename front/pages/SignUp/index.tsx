@@ -2,7 +2,7 @@ import useInput from '@hooks/useInput';
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
-import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@pages/SignUp/styles';
+import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@components/common/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
 
 const SignUpPage = () => {

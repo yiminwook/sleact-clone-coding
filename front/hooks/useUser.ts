@@ -1,6 +1,6 @@
 import { IUser } from '@typings/db';
 import useSWR from 'swr';
-import fetcher from './fetcher';
+import fetcher from '@hooks/fetcher';
 
 const useUser = () => {
   const options = {

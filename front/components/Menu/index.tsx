@@ -1,16 +1,19 @@
 import useStopPropagation from '@hooks/useStopPropagation';
 import React, { CSSProperties, MouseEvent, ReactNode } from 'react';
-import { CloseModalButton, CreateMenu } from './styles';
+import { CloseModalButton, CreateMenu } from '@components/Menu/styles';
 
 interface MenuProps {
+  show: boolean;
   onCloseModal: (e: MouseEvent) => void;
   style?: CSSProperties;
   closeButton?: boolean;
   children?: ReactNode;
 }
 
-const Menu = ({ onCloseModal, style, closeButton = true, children }: MenuProps) => {
+const Menu = ({ show, onCloseModal, style, closeButton = true, children }: MenuProps) => {
   const { stopPropagation } = useStopPropagation();
+
+  if (!show) return null;
 
   return (
     <CreateMenu onClick={onCloseModal}>

@@ -1,7 +1,7 @@
 import { CloseModalButton } from '@components/Menu/styles';
 import useStopPropagation from '@hooks/useStopPropagation';
-import React, { MouseEvent, ReactNode } from 'react';
-import { CreateModal } from './styles';
+import React, { ReactNode } from 'react';
+import { CreateModal } from '@components/Modal/styles';
 
 interface ModalProps {
   show: boolean;
