@@ -17,6 +17,7 @@ import UserProfile from '@layouts/Workspace/UserProfile';
 import axios from 'axios';
 import ChannelsSection from '@layouts/Workspace/ChannelsSection';
 import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
+import InviteWorkspaceModal from '@layouts/Workspace/InviteWorkspaceModal';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -24,6 +25,7 @@ const DirectMessage = loadable(() => import('@pages/DirectMessage'));
 const Workspace = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
+  const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
 
   const { data: userData, isLoading, mutate } = useUser();
 
@@ -44,9 +46,14 @@ const Workspace = () => {
     setShowCreateWorkspaceModal(() => true);
   }, []);
 
+  const onClickInviteWorkspace = useCallback(() => {
+    setShowInviteWorkspaceModal(() => true);
+  }, []);
+
   const onCloseModal = useCallback(() => {
     setShowCreateChannelModal(() => false);
     setShowCreateWorkspaceModal(() => false);
+    setShowInviteWorkspaceModal(() => false);
   }, []);
 
   if (isLoading) {
@@ -78,8 +85,8 @@ const Workspace = () => {
         <ChannelsSection
           onSignOut={onSignOut}
           onCloseModal={onCloseModal}
-          showCreateChannelModal={showCreateChannelModal}
           onClickCreateChannel={onClickCreateChannel}
+          onClickInviteWorkspace={onClickInviteWorkspace}
         />
         <Chats>
           <Routes>
@@ -89,6 +96,7 @@ const Workspace = () => {
         </Chats>
       </WorkspaceWrapper>
       {/* modal */}
+      <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
       <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
       <CreateWorkspaceModal showCreateWorkspaceModal={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
     </div>

@@ -6,7 +6,6 @@ interface ChannelProps {
 }
 
 const Channel = ({ channelData }: ChannelProps) => {
-  console.log('test', channelData);
   return <div>{channelData.name}</div>;
 };
 

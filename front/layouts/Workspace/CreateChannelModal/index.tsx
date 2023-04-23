@@ -17,8 +17,7 @@ const CreateChannelModal = ({ show, onCloseModal }: CreateChannelModalProps) => 
   const [newChannel, onChangeNewChannel, setNewChannel] = useInput('');
   const { workspace } = useParams<{ workspace: string; channel: string }>();
 
-  const { data: userData } = useUser();
-  const { mutate: mutateChannel } = useChannel({ workspace, userData });
+  const { mutate: mutateChannel } = useChannel(workspace);
 
   const onCreateChannel = useCallback(
     async (e: FormEvent) => {

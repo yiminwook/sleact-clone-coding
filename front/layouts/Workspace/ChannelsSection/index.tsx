@@ -9,16 +9,15 @@ import useChannel from '@hooks/useChannel';
 interface ChannelsSectionProps {
   onSignOut: () => void;
   onCloseModal: () => void;
-  showCreateChannelModal: boolean;
   onClickCreateChannel: () => void;
+  onClickInviteWorkspace: () => void;
 }
 
-const ChannelsSection = ({ onClickCreateChannel, onSignOut }: ChannelsSectionProps) => {
+const ChannelsSection = ({ onClickCreateChannel, onClickInviteWorkspace, onSignOut }: ChannelsSectionProps) => {
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
 
   const { workspace } = useParams();
-  const { data: userData } = useUser();
-  const { data: channelData } = useChannel({ workspace, userData });
+  const { data: channelData } = useChannel(workspace);
 
   const toggleWorkspaceModal = useCallback(() => {
     setShowWorkspaceMenu((pre) => !pre);
@@ -31,6 +30,14 @@ const ChannelsSection = ({ onClickCreateChannel, onSignOut }: ChannelsSectionPro
         <Menu show={showWorkspaceMenu} onCloseMenu={toggleWorkspaceModal} style={{ top: 95, left: 80 }}>
           <WorkspaceModal>
             <h2>Sleact</h2>
+            <button
+              onClick={() => {
+                toggleWorkspaceModal();
+                onClickInviteWorkspace();
+              }}
+            >
+              워크스페이스에 사용자 초대
+            </button>
             <button
               onClick={() => {
                 toggleWorkspaceModal();
