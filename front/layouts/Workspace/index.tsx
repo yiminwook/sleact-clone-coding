@@ -37,6 +37,7 @@ const Workspace = ({ children }: PropsWithChildren) => {
   }, []);
 
   const onClickUserPropfile = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
     setShowUserMenu((pre) => !pre);
   }, []);
 

@@ -1,4 +1,5 @@
-import React, { CSSProperties, MouseEvent, ReactNode, useCallback } from 'react';
+import useStopPropagation from '@hooks/useStopPropagation';
+import React, { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { CloseModalButton, CreateMenu } from './styles';
 
 interface MenuProps {
@@ -9,14 +10,12 @@ interface MenuProps {
 }
 
 const Menu = ({ onCloseModal, style, closeButton = true, children }: MenuProps) => {
-  const stopPropagation = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-  }, []);
+  const { stopPropagation } = useStopPropagation();
 
   return (
-    <CreateMenu>
+    <CreateMenu onClick={onCloseModal}>
       <div onClick={stopPropagation} style={style}>
-        {closeButton && <CloseModalButton onClick={onCloseModal}>&times;</CloseModalButton>}
+        {closeButton ? <CloseModalButton onClick={onCloseModal}>&times;</CloseModalButton> : null}
         {children}
       </div>
     </CreateMenu>

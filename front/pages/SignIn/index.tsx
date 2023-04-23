@@ -24,7 +24,7 @@ const SignInPage = () => {
             { email, password },
             { withCredentials: true },
           );
-          mutate(signinResult.data, false);
+          mutate();
         }
       } catch (error) {
         console.error(error);
