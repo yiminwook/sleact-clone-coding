@@ -2,7 +2,6 @@ import { Button, Input, Label } from '@components/common/styles';
 import Modal from '@components/Modal';
 import useChannel from '@hooks/useChannel';
 import useInput from '@hooks/useInput';
-import useUser from '@hooks/useUser';
 import axios, { AxiosError } from 'axios';
 import React, { FormEvent, useCallback } from 'react';
 import { useParams } from 'react-router';

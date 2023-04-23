@@ -7,11 +7,11 @@ import React, { FormEvent, useCallback } from 'react';
 import { toast } from 'react-toastify';
 
 interface CreateWorkspaceModalProps {
-  showCreateWorkspaceModal: boolean;
+  show: boolean;
   onCloseModal: () => void;
 }
 
-const CreateWorkspaceModal = ({ showCreateWorkspaceModal, onCloseModal }: CreateWorkspaceModalProps) => {
+const CreateWorkspaceModal = ({ show, onCloseModal }: CreateWorkspaceModalProps) => {
   const [newWorkspace, onChangeNewWorkspace, setNewWorkspace] = useInput('');
   const [newWorkspaceUrl, onChangeNewWorkspaceUrl, setNewWorkspaceUrl] = useInput('');
 
@@ -39,7 +39,7 @@ const CreateWorkspaceModal = ({ showCreateWorkspaceModal, onCloseModal }: Create
   );
 
   return (
-    <Modal show={showCreateWorkspaceModal} onCloseModal={onCloseModal}>
+    <Modal show={show} onCloseModal={onCloseModal}>
       <form onSubmit={onCreateWorkspace}>
         <Label id="workspace-label">
           <span>워크 스페이스 이름</span>

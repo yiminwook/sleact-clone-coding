@@ -2,6 +2,7 @@ import { Button, Input, Label } from '@components/common/styles';
 import Modal from '@components/Modal';
 import useChannel from '@hooks/useChannel';
 import useInput from '@hooks/useInput';
+import useMembers from '@hooks/useMember';
 import axios, { AxiosError } from 'axios';
 import React, { FormEvent, useCallback } from 'react';
 import { useParams } from 'react-router';
@@ -15,7 +16,7 @@ interface InviteWorkspaceModalProps {
 const InviteWorkspaceModal = ({ show, onCloseModal }: InviteWorkspaceModalProps) => {
   const [newMember, onChangeNewMember, setNewMember] = useInput('');
   const { workspace } = useParams();
-  const { mutate } = useChannel(workspace);
+  const { mutate } = useMembers(workspace);
 
   const onInviteMember = useCallback(
     async (e: FormEvent) => {

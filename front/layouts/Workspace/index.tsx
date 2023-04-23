@@ -18,6 +18,7 @@ import axios from 'axios';
 import ChannelsSection from '@layouts/Workspace/ChannelsSection';
 import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
 import InviteWorkspaceModal from '@layouts/Workspace/InviteWorkspaceModal';
+import InviteChannelModal from './InviteChannelModal';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -26,6 +27,7 @@ const Workspace = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
   const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
+  const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
 
   const { data: userData, isLoading, mutate } = useUser();
 
@@ -54,6 +56,7 @@ const Workspace = () => {
     setShowCreateChannelModal(() => false);
     setShowCreateWorkspaceModal(() => false);
     setShowInviteWorkspaceModal(() => false);
+    setShowInviteChannelModal(() => false);
   }, []);
 
   if (isLoading) {
@@ -96,9 +99,10 @@ const Workspace = () => {
         </Chats>
       </WorkspaceWrapper>
       {/* modal */}
-      <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
       <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
-      <CreateWorkspaceModal showCreateWorkspaceModal={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
+      <CreateWorkspaceModal show={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
+      <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
+      <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} />
     </div>
   );
 };

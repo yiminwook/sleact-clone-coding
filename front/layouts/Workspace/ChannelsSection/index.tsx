@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import { Channels, MenuScroll, WorkspaceModal, WorkspaceName } from '@layouts/Workspace/styles';
 import Menu from '@components/Menu';
 import Channel from './Channel';
-import useUser from '@hooks/useUser';
 import { useParams } from 'react-router';
 import useChannel from '@hooks/useChannel';
 
