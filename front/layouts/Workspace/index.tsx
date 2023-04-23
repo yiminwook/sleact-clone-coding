@@ -11,7 +11,6 @@ import {
 import React, { useCallback, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import loadable from '@loadable/component';
-import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import CreateWorkspaceModal from '@layouts/Workspace/CreateWorkspaceModal';
 import UserProfile from '@layouts/Workspace/UserProfile';
@@ -24,11 +23,7 @@ const DirectMessage = loadable(() => import('@pages/DirectMessage'));
 
 const Workspace = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
-
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
-
-  const params = useParams();
-  console.log(params);
 
   const { data: userData, isLoading, mutate } = useUser();
 
@@ -89,7 +84,7 @@ const Workspace = () => {
         <Chats>
           <Routes>
             <Route path="/channel/:channel" element={<ChannelPage />} />
-            <Route path="/dm" element={<DirectMessage />} />
+            <Route path="/dm/:id" element={<DirectMessage />} />
           </Routes>
         </Chats>
       </WorkspaceWrapper>

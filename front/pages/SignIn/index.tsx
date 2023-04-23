@@ -42,7 +42,7 @@ const SignInPage = () => {
   }
 
   if (data && typeof data === 'object') {
-    return <Navigate to="/workspace/channel" replace />;
+    return <Navigate to="/workspace/sleact/channel/일반" replace />;
   }
 
   return (

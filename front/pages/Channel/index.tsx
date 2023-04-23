@@ -4,7 +4,6 @@ import { useParams } from 'react-router';
 
 const ChannelPage = () => {
   const params = useParams();
-  console.log(params);
 
   return (
     <Container>

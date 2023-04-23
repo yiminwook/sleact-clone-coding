@@ -1,9 +1,10 @@
 import useInput from '@hooks/useInput';
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@components/common/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
+import useUser from '@hooks/useUser';
 
 const SignUpPage = () => {
   const [email, onChangeEmail] = useInput('');
@@ -13,6 +14,8 @@ const SignUpPage = () => {
   const [misMatchErr, setMisMatchErr] = useState(false);
   const [signUpErrMsg, setSignupErrMsg] = useState('');
   const [signUpSuccess, setSignupSuccess] = useState(false);
+
+  const { data } = useUser();
 
   const onChangePassoword = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +53,10 @@ const SignUpPage = () => {
     },
     [email, nickname, password, passwordCheck],
   );
+
+  if (data) {
+    return <Navigate to="/workspace/sleact/channel/일반" />;
+  }
 
   return (
     <section id="container">
