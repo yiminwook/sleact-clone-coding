@@ -1,33 +1,29 @@
-import React, { MouseEvent, useCallback } from 'react';
+import React, { MouseEvent, useCallback, useState } from 'react';
 import gravatar from 'gravatar';
 import { LogOutButton, ProfileImg, ProfileModal } from '@layouts/Workspace/styles';
 import useUser from '@hooks/useUser';
 import Menu from '@components/Menu';
-import axios from 'axios';
 
 interface UserProfileProps {
-  showUserMenu: boolean;
-  onClickUserProfile: (e: MouseEvent) => void;
+  onSignOut: () => void;
 }
 
-const UserProfile = ({ showUserMenu, onClickUserProfile }: UserProfileProps) => {
-  const { data: userData, mutate } = useUser();
+const UserProfile = ({ onSignOut }: UserProfileProps) => {
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const onSignOut = useCallback(async () => {
-    try {
-      await axios.post('/api/users/logout', null, { withCredentials: true });
-      mutate(false, false);
-    } catch (error) {
-      console.error(error);
-    }
+  const { data: userData } = useUser();
+
+  const toggleUserProfile = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
+    setShowUserMenu((pre) => !pre);
   }, []);
 
   if (!userData) return null;
 
   return (
-    <span onClick={onClickUserProfile}>
+    <span onClick={toggleUserProfile}>
       <ProfileImg src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.email} />
-      <Menu show={showUserMenu} onCloseModal={onClickUserProfile} style={{ right: 0, top: 38 }}>
+      <Menu show={showUserMenu} onCloseMenu={toggleUserProfile} style={{ right: 0, top: 38 }}>
         <ProfileModal>
           <img src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
           <div>

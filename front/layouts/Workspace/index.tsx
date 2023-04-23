@@ -1,55 +1,57 @@
 import useUser from '@hooks/useUser';
 import {
   AddButton,
-  Channels,
   Chats,
   Header,
-  MenuScroll,
   RightMenu,
   WorkspaceButton,
-  WorkspaceName,
   Workspaces,
   WorkspaceWrapper,
 } from '@layouts/Workspace/styles';
-import React, { MouseEvent, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import loadable from '@loadable/component';
-import Menu from '@components/Menu';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import CreateWorkspaceModal from '@layouts/Workspace/CreateWorkspaceModal';
 import UserProfile from '@layouts/Workspace/UserProfile';
+import axios from 'axios';
+import ChannelsSection from '@layouts/Workspace/ChannelsSection';
+import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
 
 const Workspace = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
+
+  const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
   const params = useParams();
+  console.log(params);
 
-  const { data: userData, isLoading } = useUser();
+  const { data: userData, isLoading, mutate } = useUser();
 
-  const onClickUserProfile = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
-    setShowUserMenu((pre) => !pre);
+  const onSignOut = useCallback(async () => {
+    try {
+      await axios.post('/api/users/logout', null, { withCredentials: true });
+      mutate(false, false);
+    } catch (error) {
+      console.error(error);
+    }
   }, []);
 
-  const onClickCreateWorkspace = useCallback(
-    (close?: boolean) => {
-      if (close === true) {
-        setShowCreateWorkspaceModal((pre) => false);
-      } else {
-        setShowCreateWorkspaceModal((pre) => !pre);
-      }
-    },
-    [showCreateWorkspaceModal],
-  );
+  const onClickCreateChannel = useCallback(() => {
+    setShowCreateChannelModal(() => true);
+  }, []);
 
-  const toggleWorkspaceModal = useCallback(() => {
-    setShowWorkspaceModal((pre) => !pre);
+  const onClickCreateWorkspace = useCallback(() => {
+    setShowCreateWorkspaceModal(() => true);
+  }, []);
+
+  const onCloseModal = useCallback(() => {
+    setShowCreateChannelModal(() => false);
+    setShowCreateWorkspaceModal(() => false);
   }, []);
 
   if (isLoading) {
@@ -64,7 +66,7 @@ const Workspace = () => {
     <div>
       <Header>
         <RightMenu>
-          <UserProfile showUserMenu={showUserMenu} onClickUserProfile={onClickUserProfile} />
+          <UserProfile onSignOut={onSignOut} />
         </RightMenu>
       </Header>
       <WorkspaceWrapper>
@@ -78,12 +80,12 @@ const Workspace = () => {
           })}
           <AddButton onClick={() => onClickCreateWorkspace()}>+</AddButton>
         </Workspaces>
-        <Channels>
-          <WorkspaceName onClick={toggleWorkspaceModal}>Sleact</WorkspaceName>
-          <MenuScroll>
-            <Menu show={showWorkspaceModal} onCloseModal={toggleWorkspaceModal} style={{ top: 95, left: 80 }}></Menu>
-          </MenuScroll>
-        </Channels>
+        <ChannelsSection
+          onSignOut={onSignOut}
+          onCloseModal={onCloseModal}
+          showCreateChannelModal={showCreateChannelModal}
+          onClickCreateChannel={onClickCreateChannel}
+        />
         <Chats>
           <Routes>
             <Route path="/channel/:channel" element={<ChannelPage />} />
@@ -91,11 +93,9 @@ const Workspace = () => {
           </Routes>
         </Chats>
       </WorkspaceWrapper>
-      <CreateWorkspaceModal
-        showCreateWorkspaceModal={showCreateWorkspaceModal}
-        onClickCreateWorkspace={onClickCreateWorkspace}
-        setShowCreateWorkspaceModal={setShowCreateWorkspaceModal}
-      />
+      {/* modal */}
+      <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
+      <CreateWorkspaceModal showCreateWorkspaceModal={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
     </div>
   );
 };

@@ -4,13 +4,13 @@ import { CloseModalButton, CreateMenu } from '@components/Menu/styles';
 
 interface MenuProps {
   show: boolean;
-  onCloseModal: (e: MouseEvent) => void;
+  onCloseMenu: (e: MouseEvent) => void;
   style?: CSSProperties;
   closeButton?: boolean;
   children?: ReactNode;
 }
 
-const Menu = ({ show, onCloseModal, style, closeButton = true, children }: MenuProps) => {
+const Menu = ({ show, onCloseMenu: onCloseModal, style, closeButton = true, children }: MenuProps) => {
   const { stopPropagation } = useStopPropagation();
 
   if (!show) return null;

@@ -3,22 +3,17 @@ import useInput from '@hooks/useInput';
 import useUser from '@hooks/useUser';
 import { Button, Input, Label } from '@components/common/styles';
 import axios, { AxiosError } from 'axios';
-import React, { Dispatch, FormEvent, SetStateAction, useCallback } from 'react';
+import React, { FormEvent, useCallback } from 'react';
 import { toast } from 'react-toastify';
 
 interface CreateWorkspaceModalProps {
   showCreateWorkspaceModal: boolean;
-  onClickCreateWorkspace: () => void;
-  setShowCreateWorkspaceModal: Dispatch<SetStateAction<boolean>>;
+  onCloseModal: () => void;
 }
 
-const CreateWorkspaceModal = ({
-  showCreateWorkspaceModal,
-  onClickCreateWorkspace,
-  setShowCreateWorkspaceModal,
-}: CreateWorkspaceModalProps) => {
+const CreateWorkspaceModal = ({ showCreateWorkspaceModal, onCloseModal }: CreateWorkspaceModalProps) => {
   const [newWorkspace, onChangeNewWorkspace, setNewWorkspace] = useInput('');
-  const [newUrl, onChangeNewUrl, setNewUrl] = useInput('');
+  const [newWorkspaceUrl, onChangeNewWorkspaceUrl, setNewWorkspaceUrl] = useInput('');
 
   const { mutate } = useUser();
 
@@ -27,12 +22,12 @@ const CreateWorkspaceModal = ({
       e.preventDefault();
       try {
         if (!(newWorkspace && newWorkspace.trim())) return;
-        if (!(newUrl && newUrl.trim())) return;
-        await axios.post('/api/workspaces', { workspace: newWorkspace, url: newUrl });
+        if (!(newWorkspaceUrl && newWorkspaceUrl.trim())) return;
+        await axios.post('/api/workspaces', { workspace: newWorkspace, url: newWorkspaceUrl });
         mutate();
-        setShowCreateWorkspaceModal(() => false);
         setNewWorkspace(() => '');
-        setNewUrl(() => '');
+        setNewWorkspaceUrl(() => '');
+        onCloseModal();
       } catch (error) {
         console.error(error);
         if (error instanceof AxiosError) {
@@ -40,19 +35,19 @@ const CreateWorkspaceModal = ({
         }
       }
     },
-    [newWorkspace, newUrl],
+    [newWorkspace, newWorkspaceUrl],
   );
 
   return (
-    <Modal show={showCreateWorkspaceModal} onCloseModal={onClickCreateWorkspace}>
+    <Modal show={showCreateWorkspaceModal} onCloseModal={onCloseModal}>
       <form onSubmit={onCreateWorkspace}>
         <Label id="workspace-label">
           <span>워크 스페이스 이름</span>
-          <Input id="workspace" value={newWorkspace} onChange={onChangeNewWorkspace} />
+          <Input id="workspace-input" value={newWorkspace} onChange={onChangeNewWorkspace} />
         </Label>
         <Label id="workspace-url-label">
           <span>워크 스페이스 url</span>
-          <Input id="workspace" value={newUrl} onChange={onChangeNewUrl} />
+          <Input id="workspace-url-input" value={newWorkspaceUrl} onChange={onChangeNewWorkspaceUrl} />
         </Label>
         <Button type="submit">생성하기</Button>
       </form>
