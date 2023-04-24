@@ -19,6 +19,7 @@ import ChannelsSection from '@layouts/Workspace/ChannelsSection';
 import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
 import InviteWorkspaceModal from '@layouts/Workspace/InviteWorkspaceModal';
 import InviteChannelModal from './InviteChannelModal';
+import { useParams } from 'react-router';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -102,7 +103,7 @@ const Workspace = () => {
       <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
       <CreateWorkspaceModal show={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
       <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
-      <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} />
+      {/* <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} /> */}
     </div>
   );
 };

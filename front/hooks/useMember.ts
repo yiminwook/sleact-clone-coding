@@ -1,9 +1,9 @@
 import useSWR from 'swr';
 import fetcher from '@hooks/fetcher';
-import { IChannel } from '@typings/db';
 import useUser from './useUser';
+import { IUser } from '@typings/db';
 
-const useMembers = (workspace: string | undefined) => {
+const useMember = (workspace: string | undefined) => {
   const { data: userData } = useUser();
 
   const options = {
@@ -14,10 +14,10 @@ const useMembers = (workspace: string | undefined) => {
 
   const { data, mutate, isLoading, error } = useSWR(
     userData ? `/api/workspaces/${workspace}/members` : null,
-    fetcher<IChannel[]>(),
+    fetcher<IUser[]>(),
     options,
   );
   return { data, mutate, isLoading, error };
 };
 
-export default useMembers;
+export default useMember;
