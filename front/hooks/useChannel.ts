@@ -1,8 +1,9 @@
 import useSWR from 'swr';
 import fetcher from '@hooks/fetcher';
 import { IChannel } from '@typings/db';
-import useUser from './useUser';
+import useUser from '@hooks/useUser';
 
+/** :workspace 내부의 내가 속해있는 채널 리스트를 가져옴 */
 const useChannel = (workspace: string | undefined) => {
   const { data: userData } = useUser();
 
@@ -12,9 +13,9 @@ const useChannel = (workspace: string | undefined) => {
     errorRetryCount: 3,
   };
 
-  const { data, mutate, isLoading, error } = useSWR(
+  const { data, mutate, isLoading, error } = useSWR<IChannel[]>(
     userData ? `/api/workspaces/${workspace}/channels` : null,
-    fetcher<IChannel[]>(),
+    fetcher,
     options,
   );
   return { data, mutate, isLoading, error };

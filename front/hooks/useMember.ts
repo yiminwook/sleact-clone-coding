@@ -1,8 +1,9 @@
 import useSWR from 'swr';
 import fetcher from '@hooks/fetcher';
-import useUser from './useUser';
+import useUser from '@hooks/useUser';
 import { IUser } from '@typings/db';
 
+/** :workspace 내부의 멤버 목록을 가져옴 */
 const useMember = (workspace: string | undefined) => {
   const { data: userData } = useUser();
 
@@ -12,9 +13,9 @@ const useMember = (workspace: string | undefined) => {
     errorRetryCount: 3,
   };
 
-  const { data, mutate, isLoading, error } = useSWR(
+  const { data, mutate, isLoading, error } = useSWR<IUser[]>(
     userData ? `/api/workspaces/${workspace}/members` : null,
-    fetcher<IUser[]>(),
+    fetcher,
     options,
   );
   return { data, mutate, isLoading, error };
