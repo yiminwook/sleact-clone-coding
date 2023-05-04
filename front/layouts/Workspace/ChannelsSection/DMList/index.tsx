@@ -1,23 +1,17 @@
 import useMember from '@hooks/useMember';
+import useUser from '@hooks/useUser';
 import { IDM, IUser } from '@typings/db';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { CollapseButton } from './styles';
 
-interface DMListProps {
-  userData?: IUser | false;
-}
-
-const DMList = ({ userData }: DMListProps) => {
-  if (!userData) return null;
-
+const DMList = () => {
   const [channelCollapse, setChannelCollapse] = useState(false);
   const [countList, setCountList] = useState<Record<string, number>>({});
   const [onlineList, setOnlineList] = useState<number[]>([]);
 
   const { workspace } = useParams();
-  const { data: memberData } = useMember(workspace);
 
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((pre) => !pre);
@@ -60,14 +54,7 @@ const DMList = ({ userData }: DMListProps) => {
         <span>Direct Messages</span>
       </h2>
       {!channelCollapse ? (
-        <CollapseItemList
-          user={userData}
-          member={memberData}
-          onlineList={onlineList}
-          counList={countList}
-          workspace={workspace}
-          onClickFunc={resetCount}
-        />
+        <CollapseItemList onlineList={onlineList} counList={countList} onClickFunc={resetCount} />
       ) : null}
     </>
   );
@@ -76,27 +63,25 @@ const DMList = ({ userData }: DMListProps) => {
 export default DMList;
 
 interface CollapseItemListProps {
-  user: IUser;
-  member: IUser[] | undefined;
-  workspace: string | undefined;
   onlineList: number[];
   counList: Record<string, number>;
   onClickFunc: (id: number) => void;
 }
 
-const CollapseItemList = ({ user, member, workspace, onlineList, counList, onClickFunc }: CollapseItemListProps) => {
-  if (!member) return null;
+const CollapseItemList = ({ onlineList, counList, onClickFunc }: CollapseItemListProps) => {
+  const { workspace } = useParams();
+  const { data: memberData } = useMember(workspace);
+
+  if (!memberData) return null;
 
   return (
     <>
-      {member.map((member) => (
+      {memberData.map((member) => (
         <CollapseItem
           key={member.id}
-          user={user}
           member={member}
           onlineList={onlineList}
           counList={counList}
-          workspace={workspace}
           onClickFunc={onClickFunc}
         />
       ))}
@@ -104,13 +89,17 @@ const CollapseItemList = ({ user, member, workspace, onlineList, counList, onCli
   );
 };
 
-interface CollapseItemProps extends Omit<CollapseItemListProps, 'member'> {
+interface CollapseItemProps extends CollapseItemListProps {
   member: IUser;
 }
 
-const CollapseItem = ({ user, member, workspace, onlineList, counList, onClickFunc }: CollapseItemProps) => {
+const CollapseItem = ({ member, onlineList, counList, onClickFunc }: CollapseItemProps) => {
+  const { workspace } = useParams();
+  const { data: userData } = useUser();
   const isOnline = onlineList.includes(member.id);
-  const count = counList[member.id] ?? 0;
+  // const count = counList[member.id] ?? 0;
+
+  if (!userData) return null;
 
   return (
     <NavLink
@@ -129,7 +118,7 @@ const CollapseItem = ({ user, member, workspace, onlineList, counList, onClickFu
         data-qa-presence-dnd="false"
       />
       <span>{member.nickname}</span>
-      {member.id === user?.id && <span> (나)</span>}
+      {member.id === userData.id && <span> (나)</span>}
     </NavLink>
   );
 };
