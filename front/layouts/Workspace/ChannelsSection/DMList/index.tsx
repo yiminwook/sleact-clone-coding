@@ -4,14 +4,16 @@ import { IDM, IUser } from '@typings/db';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { CollapseButton } from './styles';
+import { CollapseButton } from '@layouts/Workspace/ChannelsSection/DMList/styles';
+import useSocket from '@hooks/useSocket';
 
 const DMList = () => {
+  const { workspace } = useParams();
+
   const [channelCollapse, setChannelCollapse] = useState(false);
   const [countList, setCountList] = useState<Record<string, number>>({});
   const [onlineList, setOnlineList] = useState<number[]>([]);
-
-  const { workspace } = useParams();
+  const [socket, disconnect] = useSocket(workspace);
 
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((pre) => !pre);
@@ -40,6 +42,21 @@ const DMList = () => {
     setOnlineList(() => []);
     setCountList(() => ({}));
   }, [workspace]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('onlineList', (data: number[]) => {
+      console.log('test', data);
+      setOnlineList(() => data);
+    });
+    // socket.on('dm', onMessage);
+    // console.log('socket on dm', socket.hasListeners('dm'), socket);
+    return () => {
+      // socket.off('dm', onMessage);
+      // console.log('socket off dm', socket.hasListeners('dm'));
+      socket.off('onlineList');
+    };
+  }, [socket]);
 
   return (
     <>

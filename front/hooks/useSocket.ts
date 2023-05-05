@@ -1,21 +1,19 @@
 import { useCallback } from 'react';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 
-const sockets: Record<string, SocketIOClient.Socket> = {};
+const sockets: Record<string, Socket> = {};
+const baseURL = 'http://localhost:3095';
 
-const useSocket = (workspace?: string): [socket: SocketIOClient.Socket | undefined, disconnect: () => void] => {
+const useSocket = (workspace: string | undefined): [Socket | undefined, () => void] => {
   const disconnect = useCallback(() => {
     if (!workspace) return;
     sockets[workspace].disconnect();
     delete sockets[workspace];
   }, [workspace]);
-
   if (!workspace) return [undefined, disconnect];
-  sockets[workspace] = io.connect(`/api/ws-${workspace}`);
-  sockets[workspace].emit('hello', 'world');
-  sockets[workspace].on('message', (data: any) => console.log(data));
-  sockets[workspace].on('data', (data: any) => console.log(data));
-  sockets[workspace].on('onlineList', (data: any) => console.log(data));
+  if (!sockets[workspace]) {
+    sockets[workspace] = io(`${baseURL}/ws-${workspace}`, { transports: ['websocket'] });
+  }
   return [sockets[workspace], disconnect];
 };
 

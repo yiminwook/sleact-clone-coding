@@ -8,7 +8,7 @@ import {
   Workspaces,
   WorkspaceWrapper,
 } from '@layouts/Workspace/styles';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import loadable from '@loadable/component';
 import { Link } from 'react-router-dom';
@@ -20,6 +20,8 @@ import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
 import InviteWorkspaceModal from '@layouts/Workspace/InviteWorkspaceModal';
 import InviteChannelModal from './InviteChannelModal';
 import { useParams } from 'react-router';
+import useSocket from '@hooks/useSocket';
+import useChannel from '@hooks/useChannel';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -30,7 +32,11 @@ const Workspace = () => {
   const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
   const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
 
+  const { workspace } = useParams<{ workspace: string }>();
+
   const { data: userData, isLoading, mutate } = useUser();
+  const { data: channelData } = useChannel(workspace);
+  const [socket, disconnect] = useSocket(workspace);
 
   const onSignOut = useCallback(async () => {
     try {
@@ -59,6 +65,16 @@ const Workspace = () => {
     setShowInviteWorkspaceModal(() => false);
     setShowInviteChannelModal(() => false);
   }, []);
+
+  useEffect(() => {
+    if (!(socket && channelData && userData)) return;
+    socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
+  }, [socket, channelData, userData, disconnect]);
+
+  useEffect(() => {
+    return () => disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace, disconnect]);
 
   if (isLoading) {
     return <div>로딩중...</div>;

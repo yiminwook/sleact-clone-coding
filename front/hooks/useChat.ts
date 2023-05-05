@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import fetcher from '@hooks/fetcher';
 import { IDM } from '@typings/db';
 
-/** dm받는 상대방데이터 */
+/** DM채팅방 데이터 */
 const useChat = ({ id, workspace, index = 0 }: { id?: string; workspace?: string; index?: number }) => {
   const options = {
     dedupingInterval: 60 * 60 * 1000,
