@@ -39,7 +39,7 @@ const Workspace = () => {
     } catch (error) {
       console.error(error);
     }
-  }, []);
+  }, [mutate]);
 
   const onClickCreateChannel = useCallback(() => {
     setShowCreateChannelModal(() => true);
