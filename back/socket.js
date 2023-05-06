@@ -4,6 +4,9 @@ const onlineMap = {};
 module.exports = (server, app) => {
   const io = SocketIO(server, {
     path: "/socket.io",
+    cors: {
+      origin: "*",
+    },
   });
   app.set("io", io);
   app.set("onlineMap", onlineMap);

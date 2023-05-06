@@ -19,11 +19,7 @@ const SignInPage = () => {
       setSignInErrMsg(() => '');
       try {
         if (email && password) {
-          const signinResult: AxiosResponse<IUser | false> = await axios.post(
-            '/api/users/login',
-            { email, password },
-            { withCredentials: true },
-          );
+          await axios.post<IUser | false>('/api/users/login', { email, password }, { withCredentials: true });
           mutate();
         }
       } catch (error) {
@@ -34,7 +30,7 @@ const SignInPage = () => {
         }
       }
     },
-    [email, password],
+    [email, password, mutate],
   );
 
   if (isLoading) {

@@ -89,9 +89,10 @@ const config: Configuration = {
     devMiddleware: { publicPath: '/dist/' },
     static: { directory: resolve(__dirname) },
     proxy: {
-      '/api/': {
+      '/api': {
         target: 'http://localhost:3095',
         changeOrigin: true,
+        ws: true,
       },
     },
   },
