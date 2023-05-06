@@ -1,15 +1,24 @@
-import React, { ChangeEvent, FormEvent, KeyboardEvent, useCallback, useEffect, useRef } from 'react';
-import { ChatArea, Form, MentionsTextarea, SendButton, Toolbox } from '@components/ChatBox/styles';
+import React, { FormEvent, KeyboardEvent, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { ChatArea, EachMention, Form, MentionsTextarea, SendButton, Toolbox } from '@components/ChatBox/styles';
 import autosize from 'autosize';
+import { Mention, SuggestionDataItem } from 'react-mentions';
+import useMember from '@hooks/useMember';
+import { useParams } from 'react-router';
+import useUser from '@hooks/useUser';
+import gravatar from 'gravatar';
 
 interface ChatBoxProps {
   chat: string;
   onSubmitForm: (e: FormEvent | KeyboardEvent) => void;
-  onChangeChat: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  onChangeChat: (e: any) => void;
   placeholder?: string;
 }
 
 const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBoxProps) => {
+  const { workspace } = useParams<{ workspace: string }>();
+  const { data: userData } = useUser();
+  const { data: memberData = [] } = useMember(workspace);
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const onKeydownChat = useCallback(
     (e: KeyboardEvent) => {
@@ -19,6 +28,27 @@ const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBox
       }
     },
     [onSubmitForm],
+  );
+
+  // eslint-disable-next-line no-empty-pattern
+  const renderSuggestion = useCallback(
+    (
+      _suggestion: SuggestionDataItem,
+      _search: string,
+      highlightedDisplay: ReactNode,
+      index: number,
+      focus: boolean,
+    ): ReactNode => {
+      if (!memberData) return null;
+      const member = memberData[index];
+      return (
+        <EachMention focus={focus}>
+          <img src={gravatar.url(member.email, { s: '20px', d: 'retro' })} alt={member.nickname} />
+          <span>{highlightedDisplay}</span>
+        </EachMention>
+      );
+    },
+    [memberData],
   );
 
   useEffect(() => {
@@ -36,8 +66,16 @@ const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBox
           onChange={onChangeChat}
           onKeyDown={onKeydownChat}
           placeholder={placeholder}
-          ref={textAreaRef}
-        />
+          inputRef={textAreaRef}
+          allowSuggestionsAboveCursor
+        >
+          <Mention
+            appendSpaceOnAdd
+            trigger="@"
+            data={memberData.map((m) => ({ id: m.id, display: m.nickname }))}
+            renderSuggestion={renderSuggestion}
+          ></Mention>
+        </MentionsTextarea>
         <Toolbox>
           <SendButton
             className={

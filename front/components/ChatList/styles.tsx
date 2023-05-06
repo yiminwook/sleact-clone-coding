@@ -9,6 +9,12 @@ export const ChatZone = styled.div`
 export const Section = styled.section`
   margin-top: 20px;
   border-top: 1px solid #eee;
+  display: flex;
+  //최신 chat이 밑으로 가게
+  flex-direction: column-reverse;
+  & > div:first-child {
+    order: 1;
+  }
 `;
 
 export const StickyHeader = styled.div`

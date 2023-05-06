@@ -1,10 +1,12 @@
 import { ChangeEvent, Dispatch, SetStateAction, useCallback, useState } from 'react';
+import { MentionsInputProps } from 'react-mentions';
 
-type ReturnType<T> = [T, (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void, Dispatch<SetStateAction<T>>];
+export type Element = HTMLInputElement | HTMLTextAreaElement | MentionsInputProps;
+type ReturnType<T> = [T, (e: ChangeEvent<Element>) => void, Dispatch<SetStateAction<T>>];
 
 const useInput = <T>(initialData: T): ReturnType<T> => {
   const [value, setValue] = useState<T>(initialData);
-  const onChangeHandler = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const onChangeHandler = useCallback((e: ChangeEvent<Element>) => {
     setValue((pre) => {
       let curr = pre;
       if (typeof curr === 'string') {
