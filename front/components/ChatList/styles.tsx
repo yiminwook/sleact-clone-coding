@@ -12,7 +12,7 @@ export const Section = styled.section`
   display: flex;
   //최신 chat이 밑으로 가게
   flex-direction: column-reverse;
-  & > div:first-child {
+  & > div:first-of-type {
     order: 1;
   }
 `;

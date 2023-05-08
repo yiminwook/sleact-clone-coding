@@ -6,6 +6,7 @@ import useMember from '@hooks/useMember';
 import { useParams } from 'react-router';
 import useUser from '@hooks/useUser';
 import gravatar from 'gravatar';
+import regexifyString from 'regexify-string';
 
 interface ChatBoxProps {
   chat: string;
