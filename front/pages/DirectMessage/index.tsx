@@ -9,6 +9,7 @@ import useInput from '@hooks/useInput';
 import axios from 'axios';
 import useDM from '@hooks/useDM';
 import useChat from '@hooks/useChat';
+import { sortChatList } from '@utils/sortChatList';
 
 const DirectMessage = () => {
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
@@ -41,13 +42,15 @@ const DirectMessage = () => {
     return null;
   }
 
+  const convertedChatList = sortChatList(chatData?.slice().reverse());
+
   return (
     <Container>
       <Header>
         <img src={gravatar.url(dmData.email, { s: '24px', d: 'retro' })} alt={dmData.nickname} />
         <span>{dmData.nickname}</span>
       </Header>
-      <ChatList chatData={chatData} />
+      <ChatList chatListData={convertedChatList} />
       <ChatBox chat={chat} onSubmitForm={onSubmitForm} onChangeChat={onChangeChat} />
     </Container>
   );

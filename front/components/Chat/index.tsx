@@ -43,7 +43,7 @@ const Chat = ({ data }: ChatProps) => {
       <div className="chat-text">
         <div className="chat-user">
           <b>{user.nickname}</b>
-          <span>{dayjs(data.createdAt).format(' d일 h:mm A')}</span>
+          <span>{dayjs(data.createdAt).format(' (D일 A h:mm )')}</span>
         </div>
         <p>{convertContent}</p>
       </div>
