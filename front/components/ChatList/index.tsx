@@ -1,18 +1,31 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, forwardRef } from 'react';
 import { ChatZone, Section, StickyHeader } from '@components/ChatList/styles';
 import Chat from '@components/Chat';
-import { Scrollbars } from 'react-custom-scrollbars';
+import { positionValues, Scrollbars } from 'react-custom-scrollbars';
+import useChat from '@hooks/useChat';
+import { useParams } from 'react-router';
 import { sortChatList } from '@utils/sortChatList';
 
 interface ChatListProps {
   chatListData: ReturnType<typeof sortChatList>;
+  isEmpty: boolean;
+  isReachingEnd: boolean;
 }
 
-const ChatList = ({ chatListData }: ChatListProps) => {
-  const scrollbarRef = useRef<Scrollbars>(null);
-  const onScroll = useCallback(() => {
+const ChatList = forwardRef<Scrollbars, ChatListProps>(({ chatListData, isEmpty, isReachingEnd }, scrollbarRef) => {
+  const { workspace, id } = useParams<{ workspace: string; id: string }>();
+  const { setSize } = useChat({ workspace, id });
+
+  const onScroll = useCallback((values: positionValues) => {
     //스크롤이 올라가면 과거 채팅을 가져온다.
+    if (values.scrollTop === 0 && !isReachingEnd) {
+      console.log('가장위');
+      setSize((prevSize) => prevSize + 1).then(() => {
+        //스크롤 높이 유지
+      });
+    }
   }, []);
+
   return (
     <ChatZone>
       <Scrollbars autoHide ref={scrollbarRef} onScrollFrame={onScroll}>
@@ -29,6 +42,6 @@ const ChatList = ({ chatListData }: ChatListProps) => {
       </Scrollbars>
     </ChatZone>
   );
-};
+});
 
 export default ChatList;
