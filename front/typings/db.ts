@@ -35,7 +35,7 @@ export interface IDM {
   ReceiverId: number; // 받는 사람 아이디
   Receiver: IUser;
   content: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export interface IWorkspace {

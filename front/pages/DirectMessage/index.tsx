@@ -1,4 +1,4 @@
-import React, { FormEvent, useCallback, useRef } from 'react';
+import React, { FormEvent, useCallback, useEffect, useRef } from 'react';
 import { Header, Container } from '@pages/DirectMessage/styles';
 import gravatar from 'gravatar';
 import { useParams } from 'react-router';
@@ -26,26 +26,47 @@ const DirectMessage = () => {
   const onSubmitForm = useCallback(
     async (e: FormEvent | KeyboardEvent) => {
       e.preventDefault();
+      const savedChat = chat?.trim();
+      if (!(savedChat && chatData && userData && dmData)) return;
+
       try {
-        if (!chat.trim()) return;
-        const response = await axios.post<'ok'>(`/api/workspaces/${workspace}/dms/${id}/chats`, {
+        chatMutate((prevChatData) => {
+          prevChatData?.[0].unshift({
+            id: (chatData[0][0]?.id || 0) + 1,
+            content: savedChat,
+            SenderId: userData.id,
+            Sender: userData,
+            ReceiverId: dmData.id,
+            Receiver: dmData,
+            createdAt: new Date(),
+          });
+          return prevChatData;
+        }, false);
+        setChat('');
+        scrollbarRef.current?.scrollToBottom();
+        const response = await axios.post(`/api/workspaces/${workspace}/dms/${id}/chats`, {
           content: chat,
         });
-
-        if (response.data !== 'ok') throw new Error('fail to post chats');
-        setChat(() => '');
         chatMutate();
+        if (response.data !== 'ok') throw new Error('fail to post chats');
       } catch (error) {
         console.error(error);
       }
     },
-    [chat, id, workspace, setChat, chatMutate],
+    [chat, chatData, userData, dmData, workspace, id, chatMutate, setChat],
   );
+
+  //첫화면에서 스크롤바 제일 아래로
+  useEffect(() => {
+    if (chatData?.length === 1) {
+      scrollbarRef.current?.scrollToBottom();
+    }
+  }, [chatData]);
 
   if (!(userData && dmData)) {
     return null;
   }
-
+  console.log('data', chatData);
   const chatListData = sortChatList(chatData ? chatData.flat().reverse() : []);
 
   return (
