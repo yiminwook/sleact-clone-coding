@@ -1,4 +1,11 @@
-import React, { useCallback, forwardRef } from 'react';
+import React, {
+  useCallback,
+  forwardRef,
+  MutableRefObject,
+  ForwardedRef,
+  RefObject,
+  ForwardRefRenderFunction,
+} from 'react';
 import { ChatZone, Section, StickyHeader } from '@components/ChatList/styles';
 import Chat from '@components/Chat';
 import { positionValues, Scrollbars } from 'react-custom-scrollbars';
@@ -12,19 +19,27 @@ interface ChatListProps {
   isReachingEnd: boolean;
 }
 
-const ChatList = forwardRef<Scrollbars, ChatListProps>(({ chatListData, isEmpty, isReachingEnd }, scrollbarRef) => {
+const ChatList: ForwardRefRenderFunction<Scrollbars, ChatListProps> = (
+  { chatListData, isEmpty, isReachingEnd },
+  scrollbarRef,
+) => {
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
   const { setSize } = useChat({ workspace, id });
 
-  const onScroll = useCallback((values: positionValues) => {
-    //스크롤이 올라가면 과거 채팅을 가져온다.
-    if (values.scrollTop === 0 && !isReachingEnd) {
-      console.log('가장위');
-      setSize((prevSize) => prevSize + 1).then(() => {
+  const onScroll = useCallback(
+    async (values: positionValues) => {
+      //스크롤이 올라가면 과거 채팅을 가져온다.
+      console.log(values.scrollHeight);
+      if (values.scrollTop === 0 && !isReachingEnd) {
+        console.log('가장위');
+        await setSize((prevSize) => prevSize + 1);
         //스크롤 높이 유지
-      });
-    }
-  }, []);
+        const current = (scrollbarRef as MutableRefObject<Scrollbars>).current;
+        current.scrollTop(current.getScrollHeight() - values.scrollHeight);
+      }
+    },
+    [isReachingEnd, setSize, scrollbarRef],
+  );
 
   return (
     <ChatZone>
@@ -42,6 +57,6 @@ const ChatList = forwardRef<Scrollbars, ChatListProps>(({ chatListData, isEmpty,
       </Scrollbars>
     </ChatZone>
   );
-});
+};
 
-export default ChatList;
+export default forwardRef(ChatList);
