@@ -14,7 +14,6 @@ import { sortChatList } from '@utils/sortChatList';
 import Scrollbars from 'react-custom-scrollbars';
 import useSocket from '@hooks/useSocket';
 import { IDM } from '@typings/db';
-import { compareIssuePositions } from 'fork-ts-checker-webpack-plugin/lib/issue/issue-position';
 
 const DirectMessage = () => {
   //id는 상대방
@@ -22,7 +21,7 @@ const DirectMessage = () => {
   const { data: userData } = useUser();
   const { data: dmData } = useDM({ workspace, id });
   const { data: chatData, mutate: chatMutate, setSize, isLoading } = useChat({ workspace, id });
-  const [socket, disconnect] = useSocket(workspace);
+  const [socket] = useSocket(workspace);
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachedEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
 
@@ -37,7 +36,8 @@ const DirectMessage = () => {
 
       try {
         await chatMutate((prevChatData) => {
-          prevChatData?.[0].unshift({
+          if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
+          const data: IDM = {
             id: (chatData[0][0]?.id || 0) + 1,
             content: savedChat,
             SenderId: userData.id,
@@ -45,8 +45,8 @@ const DirectMessage = () => {
             ReceiverId: dmData.id,
             Receiver: dmData,
             createdAt: new Date(),
-          });
-          return prevChatData;
+          };
+          return [[data, ...prevChatData[0]]];
         }, false);
         setChat(() => '');
         setTimeout(() => {
@@ -72,9 +72,9 @@ const DirectMessage = () => {
       if (!userData) return;
       //나의 채팅이 아닌경우만
       if (data.SenderId === Number(id) && userData.id !== Number(id)) {
-        await chatMutate((chatData) => {
-          if (chatData === undefined || chatData.length <= 0) return chatData;
-          return [[data, ...chatData[0]]];
+        await chatMutate((prevChatData) => {
+          if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
+          return [[data, ...prevChatData[0]]];
         }, false);
 
         const currentTarget = scrollbarRef.current;

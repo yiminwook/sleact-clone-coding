@@ -18,7 +18,6 @@ import axios from 'axios';
 import ChannelsSection from '@components/ChannelsSection';
 import CreateChannelModal from '@components/CreateChannelModal';
 import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
-import InviteChannelModal from '../../components/InviteChannelModal';
 import { useParams } from 'react-router';
 import useSocket from '@hooks/useSocket';
 import useChannel from '@hooks/useChannel';
@@ -30,7 +29,6 @@ const Workspace = () => {
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
   const [showInviteWorkspaceModal, setShowInviteWorkspaceModal] = useState(false);
-  const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
 
   const { workspace } = useParams<{ workspace: string }>();
 
@@ -63,7 +61,6 @@ const Workspace = () => {
     setShowCreateChannelModal(() => false);
     setShowCreateWorkspaceModal(() => false);
     setShowInviteWorkspaceModal(() => false);
-    setShowInviteChannelModal(() => false);
   }, []);
 
   useEffect(() => {
@@ -119,7 +116,6 @@ const Workspace = () => {
       <CreateChannelModal show={showCreateChannelModal} onCloseModal={onCloseModal} />
       <CreateWorkspaceModal show={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
       <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
-      {/* <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} /> */}
     </>
   );
 };

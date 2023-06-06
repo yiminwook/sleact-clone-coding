@@ -75,7 +75,7 @@ const CollapseItem = ({ channel }: CollapseItemProps) => {
   return (
     <NavLink
       className={({ isActive }) => (isActive === true ? 'selected' : '')}
-      to={`workspace/${workspace}/channel/${channel.name}`}
+      to={`/workspace/${workspace}/channel/${channel.name}`}
     >
       <span># {channel.name}</span>
     </NavLink>
