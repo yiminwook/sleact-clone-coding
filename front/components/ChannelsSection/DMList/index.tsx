@@ -4,7 +4,7 @@ import { IDM, IUser } from '@typings/db';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { CollapseButton } from '@layouts/Workspace/ChannelsSection/DMList/styles';
+import { CollapseButton } from '@components/ChannelsSection/DMList/styles';
 import useSocket from '@hooks/useSocket';
 
 const DMList = () => {

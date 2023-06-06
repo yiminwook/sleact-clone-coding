@@ -1,6 +1,6 @@
 import Menu from '@components/Menu';
-import ChannelList from '@layouts/Workspace/ChannelsSection/ChannelList';
-import DMList from '@layouts/Workspace/ChannelsSection/DMList';
+import ChannelList from '@components/ChannelsSection/ChannelList';
+import DMList from '@components/ChannelsSection/DMList';
 import { Channels, MenuScroll, WorkspaceModal, WorkspaceName } from '@layouts/Workspace/styles';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router';

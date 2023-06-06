@@ -12,13 +12,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import loadable from '@loadable/component';
 import { Link } from 'react-router-dom';
-import CreateWorkspaceModal from '@layouts/Workspace/CreateWorkspaceModal';
-import UserProfile from '@layouts/Workspace/UserProfile';
+import CreateWorkspaceModal from '@components/CreateWorkspaceModal';
+import UserProfile from '@components/UserProfile';
 import axios from 'axios';
-import ChannelsSection from '@layouts/Workspace/ChannelsSection';
-import CreateChannelModal from '@layouts/Workspace/CreateChannelModal';
-import InviteWorkspaceModal from '@layouts/Workspace/InviteWorkspaceModal';
-import InviteChannelModal from './InviteChannelModal';
+import ChannelsSection from '@components/ChannelsSection';
+import CreateChannelModal from '@components/CreateChannelModal';
+import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
+import InviteChannelModal from '../../components/InviteChannelModal';
 import { useParams } from 'react-router';
 import useSocket from '@hooks/useSocket';
 import useChannel from '@hooks/useChannel';
@@ -85,7 +85,7 @@ const Workspace = () => {
   }
 
   return (
-    <div>
+    <>
       <Header>
         <RightMenu>
           <UserProfile onSignOut={onSignOut} />
@@ -120,7 +120,7 @@ const Workspace = () => {
       <CreateWorkspaceModal show={showCreateWorkspaceModal} onCloseModal={onCloseModal} />
       <InviteWorkspaceModal show={showInviteWorkspaceModal} onCloseModal={onCloseModal} />
       {/* <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} /> */}
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,3 @@
-import useSWR from 'swr';
 import fetcher from '@hooks/fetcher';
 import { IDM } from '@typings/db';
 import useSWRInfinite from 'swr/infinite';

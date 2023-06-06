@@ -5,7 +5,7 @@ import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { CollapseButton } from '@layouts/Workspace/ChannelsSection/DMList/styles';
+import { CollapseButton } from '@components/ChannelsSection/DMList/styles';
 
 const ChannelList = () => {
   const [channelCollapse, setChannelCollapse] = useState(false);

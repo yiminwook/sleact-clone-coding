@@ -22,7 +22,7 @@ const UserProfile = ({ onSignOut }: UserProfileProps) => {
 
   return (
     <span onClick={toggleUserProfile}>
-      <ProfileImg src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.email} />
+      <ProfileImg src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
       <Menu show={showUserMenu} onCloseMenu={toggleUserProfile} style={{ right: 0, top: 38 }}>
         <ProfileModal>
           <img src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />

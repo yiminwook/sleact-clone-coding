@@ -7,16 +7,7 @@ type ReturnType<T> = [T, (e: ChangeEvent<Element>) => void, Dispatch<SetStateAct
 const useInput = <T>(initialData: T): ReturnType<T> => {
   const [value, setValue] = useState<T>(initialData);
   const onChangeHandler = useCallback((e: ChangeEvent<Element>) => {
-    setValue((pre) => {
-      let curr = pre;
-      if (typeof curr === 'string') {
-        curr = e.target.value as unknown as T;
-      }
-      if (typeof curr === 'number') {
-        curr = Number(e.target.value) as unknown as T;
-      }
-      return curr;
-    });
+    setValue((pre) => e.target.value as unknown as T);
   }, []);
   return [value, onChangeHandler, setValue];
 };
