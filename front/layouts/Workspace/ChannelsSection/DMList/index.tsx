@@ -40,7 +40,7 @@ const DMList = () => {
 
   useEffect(() => {
     setOnlineList(() => []);
-    setCountList(() => ({}));
+    // setCountList(() => ({}));
   }, [workspace]);
 
   useEffect(() => {

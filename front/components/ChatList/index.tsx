@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  forwardRef,
-  MutableRefObject,
-  ForwardedRef,
-  RefObject,
-  ForwardRefRenderFunction,
-} from 'react';
+import React, { useCallback, forwardRef, MutableRefObject, ForwardRefRenderFunction } from 'react';
 import { ChatZone, Section, StickyHeader } from '@components/ChatList/styles';
 import Chat from '@components/Chat';
 import { positionValues, Scrollbars } from 'react-custom-scrollbars';
@@ -29,13 +22,12 @@ const ChatList: ForwardRefRenderFunction<Scrollbars, ChatListProps> = (
   const onScroll = useCallback(
     async (values: positionValues) => {
       //스크롤이 올라가면 과거 채팅을 가져온다.
-      console.log(values.scrollHeight);
+      const currentTarget = (scrollbarRef as MutableRefObject<Scrollbars>).current;
       if (values.scrollTop === 0 && !isReachingEnd) {
-        console.log('가장위');
+        // console.log('가장위');
         await setSize((prevSize) => prevSize + 1);
         //스크롤 높이 유지
-        const current = (scrollbarRef as MutableRefObject<Scrollbars>).current;
-        current.scrollTop(current.getScrollHeight() - values.scrollHeight);
+        currentTarget.scrollTop(currentTarget.getScrollHeight() - values.scrollHeight);
       }
     },
     [isReachingEnd, setSize, scrollbarRef],

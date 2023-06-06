@@ -1,4 +1,5 @@
-import React, { FormEvent, useCallback, useEffect, useRef } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Header, Container } from '@pages/DirectMessage/styles';
 import gravatar from 'gravatar';
 import { useParams } from 'react-router';
@@ -11,12 +12,17 @@ import useDM from '@hooks/useDM';
 import useChat from '@hooks/useChat';
 import { sortChatList } from '@utils/sortChatList';
 import Scrollbars from 'react-custom-scrollbars';
+import useSocket from '@hooks/useSocket';
+import { IDM } from '@typings/db';
+import { compareIssuePositions } from 'fork-ts-checker-webpack-plugin/lib/issue/issue-position';
 
 const DirectMessage = () => {
+  //id는 상대방
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
   const { data: userData } = useUser();
   const { data: dmData } = useDM({ workspace, id });
-  const { data: chatData, mutate: chatMutate, setSize } = useChat({ workspace, id });
+  const { data: chatData, mutate: chatMutate, setSize, isLoading } = useChat({ workspace, id });
+  const [socket, disconnect] = useSocket(workspace);
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachedEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
 
@@ -30,7 +36,7 @@ const DirectMessage = () => {
       if (!(savedChat && chatData && userData && dmData)) return;
 
       try {
-        chatMutate((prevChatData) => {
+        await chatMutate((prevChatData) => {
           prevChatData?.[0].unshift({
             id: (chatData[0][0]?.id || 0) + 1,
             content: savedChat,
@@ -42,32 +48,74 @@ const DirectMessage = () => {
           });
           return prevChatData;
         }, false);
-        setChat('');
-        scrollbarRef.current?.scrollToBottom();
+        setChat(() => '');
+        setTimeout(() => {
+          scrollbarRef.current?.scrollToBottom();
+        }, 50);
         const response = await axios.post(`/api/workspaces/${workspace}/dms/${id}/chats`, {
           content: chat,
         });
-        chatMutate();
+
         if (response.data !== 'ok') throw new Error('fail to post chats');
       } catch (error) {
         console.error(error);
+      } finally {
+        await chatMutate();
       }
     },
     [chat, chatData, userData, dmData, workspace, id, chatMutate, setChat],
   );
 
+  const onMessage = useCallback(
+    async (data: IDM) => {
+      // id는 상대방 아이디
+      if (!userData) return;
+      //나의 채팅이 아닌경우만
+      if (data.SenderId === Number(id) && userData.id !== Number(id)) {
+        await chatMutate((chatData) => {
+          if (chatData === undefined || chatData.length <= 0) return chatData;
+          return [[data, ...chatData[0]]];
+        }, false);
+
+        const currentTarget = scrollbarRef.current;
+
+        if (
+          currentTarget &&
+          currentTarget.getScrollHeight() - currentTarget.getClientHeight() - currentTarget.getScrollTop() < 150
+        ) {
+          setTimeout(() => {
+            currentTarget?.scrollToBottom();
+          }, 50);
+        }
+      }
+    },
+    [userData, id, chatMutate, chatData],
+  );
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('dm', onMessage);
+
+    return () => {
+      socket.off('dm', onMessage);
+    };
+  }, [socket, onMessage]);
+
   //첫화면에서 스크롤바 제일 아래로
   useEffect(() => {
-    if (chatData?.length === 1) {
+    if (!chatData || chatData.length <= 0) return;
+    console.log('스크롤바 아래로');
+    const timer = setTimeout(() => {
       scrollbarRef.current?.scrollToBottom();
-    }
-  }, [chatData]);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [id, isLoading]);
+
+  const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
   if (!(userData && dmData)) {
     return null;
   }
-  console.log('data', chatData);
-  const chatListData = sortChatList(chatData ? chatData.flat().reverse() : []);
 
   return (
     <Container>
