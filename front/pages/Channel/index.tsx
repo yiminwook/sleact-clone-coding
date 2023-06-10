@@ -1,5 +1,5 @@
 import React, { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Container, Header } from '@pages/Channel/styles';
+import { Container, DragOver, Header } from '@pages/Channel/styles';
 import { useParams } from 'react-router';
 import ChatList from '@components/ChatList';
 import ChatBox from '@components/ChatBox';
@@ -41,6 +41,7 @@ const ChannelPage = () => {
   const [chat, onChangeChat, setChat] = useInput('');
   const scrollbarRef = useRef<Scrollbars>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const dragRef = useRef<HTMLDivElement>(null);
 
   const onSubmitForm = useCallback(
     async (e: FormEvent | KeyboardEvent) => {
@@ -116,11 +117,24 @@ const ChannelPage = () => {
   const onDragOver = useCallback(
     (e: DragEvent) => {
       e.preventDefault();
-
+      e.stopPropagation();
       if (isDragOver) return;
       setIsDragOver(() => true);
     },
     [isDragOver],
+  );
+
+  const onDragLeave = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(e.target === dragRef.current);
+      console.log(dragRef.current, e.target);
+      if (dragRef.current === e.target) {
+        setIsDragOver(() => false);
+      }
+    },
+    [dragRef],
   );
 
   const onDragDrop = useCallback(async (e: DragEvent) => {
@@ -193,7 +207,7 @@ const ChannelPage = () => {
   }
 
   return (
-    <Container onDrop={onDragDrop} onDragOver={onDragOver}>
+    <Container onDrop={onDragDrop} onDragOver={onDragOver} onDragLeave={onDragLeave}>
       <Header>
         <span>#{channel}</span>
         <div className="header-right">
@@ -212,6 +226,7 @@ const ChannelPage = () => {
       <ChatList chatListData={chatListData} ref={scrollbarRef} isEmpty={isEmpty} isReachingEnd={isReachedEnd} />
       <ChatBox chat={chat} onSubmitForm={onSubmitForm} onChangeChat={onChangeChat} />
       <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} />
+      {isDragOver ? <DragOver ref={dragRef}>업로드</DragOver> : null}
     </Container>
   );
 };

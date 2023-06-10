@@ -1,10 +1,9 @@
-import React, { FormEvent, KeyboardEvent, ReactNode, useCallback, useEffect, useRef } from 'react';
+import React, { FormEvent, KeyboardEvent, memo, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { ChatArea, EachMention, Form, MentionsTextarea, SendButton, Toolbox } from '@components/ChatBox/styles';
 import autosize from 'autosize';
 import { Mention, SuggestionDataItem } from 'react-mentions';
 import useMember from '@hooks/useMember';
 import { useParams } from 'react-router';
-import useUser from '@hooks/useUser';
 import gravatar from 'gravatar';
 
 interface ChatBoxProps {
@@ -16,7 +15,6 @@ interface ChatBoxProps {
 
 const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBoxProps) => {
   const { workspace } = useParams<{ workspace: string }>();
-  const { myData } = useUser();
   const { data: memberData = [] } = useMember(workspace);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,4 +94,4 @@ const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBox
   );
 };
 
-export default ChatBox;
+export default memo(ChatBox);

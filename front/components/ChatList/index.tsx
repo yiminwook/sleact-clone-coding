@@ -1,4 +1,4 @@
-import React, { useCallback, forwardRef, MutableRefObject, ForwardRefRenderFunction } from 'react';
+import React, { useCallback, forwardRef, MutableRefObject, ForwardRefRenderFunction, memo } from 'react';
 import { ChatZone, Section, StickyHeader } from '@components/ChatList/styles';
 import Chat from '@components/Chat';
 import { positionValues, Scrollbars } from 'react-custom-scrollbars';
@@ -51,4 +51,4 @@ const ChatList: ForwardRefRenderFunction<Scrollbars, ChatListProps> = (
   );
 };
 
-export default forwardRef(ChatList);
+export default memo(forwardRef(ChatList));
