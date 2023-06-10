@@ -21,7 +21,7 @@ console.log('MODE::isDevelopment=', isDevelopment);
 const config: Configuration = {
   name: 'sleact_front',
   mode: isDevelopment ? 'development' : 'production',
-  devtool: !isDevelopment ? 'hidden-source-map' : 'eval-source-map',
+  devtool: !isDevelopment ? 'hidden-source-map' : 'eval',
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
@@ -101,7 +101,7 @@ const config: Configuration = {
 if (isDevelopment && config.plugins) {
   config.plugins.push(new HotModuleReplacementPlugin());
   config.plugins.push(new ReactRefreshWebpackPlugin());
-  config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'server', openAnalyzer: false }));
+  config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'server', openAnalyzer: true }));
 }
 
 if (!isDevelopment && config.plugins) {
