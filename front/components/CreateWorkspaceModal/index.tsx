@@ -15,7 +15,7 @@ const CreateWorkspaceModal = ({ show, onCloseModal }: CreateWorkspaceModalProps)
   const [newWorkspace, onChangeNewWorkspace, setNewWorkspace] = useInput('');
   const [newWorkspaceUrl, onChangeNewWorkspaceUrl, setNewWorkspaceUrl] = useInput('');
 
-  const { mutate } = useUser();
+  const { mutateMyData } = useUser();
 
   const onCreateWorkspace = useCallback(
     async (e: FormEvent) => {
@@ -24,7 +24,7 @@ const CreateWorkspaceModal = ({ show, onCloseModal }: CreateWorkspaceModalProps)
         if (!(newWorkspace && newWorkspace.trim())) return;
         if (!(newWorkspaceUrl && newWorkspaceUrl.trim())) return;
         await axios.post('/api/workspaces', { workspace: newWorkspace, url: newWorkspaceUrl });
-        mutate();
+        mutateMyData();
         setNewWorkspace(() => '');
         setNewWorkspaceUrl(() => '');
         onCloseModal();

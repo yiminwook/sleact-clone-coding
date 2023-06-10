@@ -1,4 +1,4 @@
-import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Header } from '@pages/Channel/styles';
 import { useParams } from 'react-router';
 import ChatList from '@components/ChatList';
@@ -40,6 +40,7 @@ const ChannelPage = () => {
 
   const [chat, onChangeChat, setChat] = useInput('');
   const scrollbarRef = useRef<Scrollbars>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const onSubmitForm = useCallback(
     async (e: FormEvent | KeyboardEvent) => {
@@ -86,7 +87,12 @@ const ChannelPage = () => {
       // id는 상대방 아이디
       if (!myData) return;
       //나의 채팅이 아닌경우만
-      if (data.Channel.name === channel && data.UserId !== myData.id) {
+      if (
+        (data.Channel.name === channel &&
+          (data.content.startsWith('uploads\\') || data.content.startsWith('upload/'))) ||
+        data.UserId !== myData.id
+      ) {
+        //  내가 보낸 이미지는 optimistic ui 적용x
         await chatMutate((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           return [[data, ...prevChatData[0]]];
@@ -106,6 +112,46 @@ const ChannelPage = () => {
     },
     [myData, channel, chatMutate],
   );
+
+  const onDragOver = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+
+      if (isDragOver) return;
+      setIsDragOver(() => true);
+    },
+    [isDragOver],
+  );
+
+  const onDragDrop = useCallback(async (e: DragEvent) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (e.dataTransfer.items) {
+        for (let i = 0; i < e.dataTransfer.items.length; i++) {
+          const item = e.dataTransfer.items[i];
+          if (item.kind === 'file') {
+            const file = item.getAsFile()!;
+            formData.append('image', file);
+          }
+        }
+      } else {
+        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+          const file = e.dataTransfer.files[i];
+          formData.append('image', file);
+        }
+      }
+
+      if (!formData.has('image')) return;
+      await axios.post(`/api/workspaces/${workspace}/channels/${channel}/images`, formData);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await chatMutate();
+      scrollbarRef.current?.scrollToBottom();
+      setIsDragOver(() => false);
+    }
+  }, []);
 
   const inviteChannel = useCallback(() => {
     setShowInviteChannelModal(() => true);
@@ -141,7 +187,7 @@ const ChannelPage = () => {
   }
 
   return (
-    <Container>
+    <Container onDrop={onDragDrop} onDragOver={onDragOver}>
       <Header>
         <span>#{channel}</span>
         <div className="header-right">

@@ -9,16 +9,20 @@ import { Link, useParams } from 'react-router-dom';
 interface ChatProps {
   data: IDM | IChat;
 }
+const BACK_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3095' : 'http://localhost:3095';
 
 const Chat = ({ data }: ChatProps) => {
   const user = 'Sender' in data ? data.Sender : data.User;
 
   const { workspace } = useParams<{ workspace: string }>();
 
-  const convertContent = useMemo(
-    () =>
+  const convertContent = useMemo(() => {
+    const { content } = data;
+    return content.startsWith('uploads\\') || content.startsWith('upload/') ? (
+      <img src={`${BACK_URL}/${content}`} style={{ maxHeight: '200px' }} alt={`${content}`}></img>
+    ) : (
       regexifyString({
-        input: data.content,
+        input: content,
         pattern: /@\[.+?\]\(\d+?\)|\n/g,
         decorator(match, index) {
           const arr: string[] | null = match.match(/@\[(.+?)\]\((\d+?)\)/);
@@ -32,9 +36,9 @@ const Chat = ({ data }: ChatProps) => {
 
           return <br key={index} />; //줄바꿈 처리
         },
-      }),
-    [data.content, workspace],
-  );
+      })
+    );
+  }, [data.content, workspace]);
 
   return (
     <ChatWrapper>

@@ -15,7 +15,7 @@ const SignUpPage = () => {
   const [signUpErrMsg, setSignupErrMsg] = useState('');
   const [signUpSuccess, setSignupSuccess] = useState(false);
 
-  const { data } = useUser();
+  const { myData } = useUser();
 
   const onChangePassoword = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +54,7 @@ const SignUpPage = () => {
     [email, nickname, password, passwordCheck],
   );
 
-  if (data) {
+  if (myData) {
     return <Navigate to="/workspace/sleact/channel/일반" />;
   }
 

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Header, Container } from '@pages/DirectMessage/styles';
+import React, { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Header, Container, DragOver } from '@pages/DirectMessage/styles';
 import gravatar from 'gravatar';
 import { useParams } from 'react-router';
 import useUser from '@hooks/useUser';
@@ -27,6 +27,7 @@ const DirectMessage = () => {
 
   const [chat, onChangeChat, setChat] = useInput('');
   const scrollbarRef = useRef<Scrollbars>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const onSubmitForm = useCallback(
     async (e: FormEvent | KeyboardEvent) => {
@@ -92,6 +93,46 @@ const DirectMessage = () => {
     [myData, id, chatMutate, chatData],
   );
 
+  const onDragOver = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+
+      if (isDragOver) return;
+      setIsDragOver(() => true);
+    },
+    [isDragOver],
+  );
+
+  const onDragDrop = useCallback(async (e: DragEvent) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (e.dataTransfer.items) {
+        for (let i = 0; i < e.dataTransfer.items.length; i++) {
+          const item = e.dataTransfer.items[i];
+          if (item.kind === 'file') {
+            const file = item.getAsFile()!;
+            formData.append('image', file);
+          }
+        }
+      } else {
+        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+          const file = e.dataTransfer.files[i];
+          formData.append('image', file);
+        }
+      }
+
+      if (!formData.has('image')) return;
+      await axios.post(`/api/workspaces/${workspace}/dms/${id}/images`, formData);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await chatMutate();
+      scrollbarRef.current?.scrollToBottom();
+      setIsDragOver(() => false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!socket) return;
     socket.on('dm', onMessage);
@@ -104,7 +145,6 @@ const DirectMessage = () => {
   //첫화면에서 스크롤바 제일 아래로
   useEffect(() => {
     if (!chatData || chatData.length <= 0) return;
-    console.log('스크롤바 아래로');
     const timer = setTimeout(() => {
       scrollbarRef.current?.scrollToBottom();
     }, 100);
@@ -118,13 +158,14 @@ const DirectMessage = () => {
   }
 
   return (
-    <Container onDrop={() => {}} onDragOver={() => {}}>
+    <Container onDrop={onDragDrop} onDragOver={onDragOver}>
       <Header>
         <img src={gravatar.url(dmData.email, { s: '24px', d: 'retro' })} alt={dmData.nickname} />
         <span>{dmData.nickname}</span>
       </Header>
       <ChatList chatListData={chatListData} ref={scrollbarRef} isEmpty={isEmpty} isReachingEnd={isReachedEnd} />
       <ChatBox chat={chat} onSubmitForm={onSubmitForm} onChangeChat={onChangeChat} />
+      {isDragOver ? <DragOver>업로드</DragOver> : null}
     </Container>
   );
 };

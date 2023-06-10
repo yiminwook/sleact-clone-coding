@@ -1,5 +1,5 @@
 import useInput from '@hooks/useInput';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
 import React, { FormEvent, useCallback, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Header, Label, Form, Input, LinkContainer, Button, Error } from '@components/common/styles';
@@ -11,7 +11,7 @@ const SignInPage = () => {
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
   const [signInErrMsg, setSignInErrMsg] = useState('');
-  const { data, mutate, isLoading } = useUser();
+  const { myData, mutateMyData, isLoadingMyData } = useUser();
 
   const onSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -20,7 +20,7 @@ const SignInPage = () => {
       try {
         if (email && password) {
           await axios.post<IUser | false>('/api/users/login', { email, password }, { withCredentials: true });
-          mutate();
+          mutateMyData();
         }
       } catch (error) {
         console.error(error);
@@ -30,14 +30,14 @@ const SignInPage = () => {
         }
       }
     },
-    [email, password, mutate],
+    [email, password, mutateMyData],
   );
 
-  if (isLoading) {
+  if (isLoadingMyData) {
     return <div>로딩중...</div>;
   }
 
-  if (data && typeof data === 'object') {
+  if (myData && typeof myData === 'object') {
     return <Navigate to="/workspace/sleact/channel/일반" replace />;
   }
 
