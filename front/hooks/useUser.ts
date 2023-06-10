@@ -9,8 +9,12 @@ const useUser = () => {
     errorRetryInterval: 500,
     errorRetryCount: 3,
   };
-  const { data, mutate, isLoading } = useSWR<IUser | false>('/api/users', fetcher, options);
-  return { data, mutate, isLoading };
+  const {
+    data: myData,
+    mutate: mutateMyData,
+    isLoading: isLoadingMyData,
+  } = useSWR<IUser | false>('/api/users', fetcher, options);
+  return { myData, mutateMyData, isLoadingMyData };
 };
 
 export default useUser;

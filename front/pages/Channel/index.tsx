@@ -18,7 +18,7 @@ import { sortChatList } from '@utils/sortChatList';
 const ChannelPage = () => {
   const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
   const { workspace, channel } = useParams<{ workspace: string; channel: string }>();
-  const { data: userData } = useUser();
+  const { myData } = useUser();
   const { data: channelData } = useSWR<IChannel>(`/api/workspaces/${workspace}/channels/${channel}`, fetcher);
   const {
     data: chatData,
@@ -32,7 +32,7 @@ const ChannelPage = () => {
     data: channelMembersData,
     mutate: channelMutate,
     isLoading,
-  } = useSWR<IUser[]>(userData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null, fetcher);
+  } = useSWR<IUser[]>(myData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null, fetcher);
 
   const [socket] = useSocket(workspace);
   const isEmpty = chatData?.[0]?.length === 0;
@@ -45,7 +45,7 @@ const ChannelPage = () => {
     async (e: FormEvent | KeyboardEvent) => {
       e.preventDefault();
       const savedChat = chat?.trim();
-      if (!(savedChat && chatData && userData && channelData)) return;
+      if (!(savedChat && chatData && myData && channelData)) return;
 
       try {
         await chatMutate((prevChatData) => {
@@ -53,8 +53,8 @@ const ChannelPage = () => {
           const data: IChat = {
             id: (chatData[0][0]?.id || 0) + 1,
             content: savedChat,
-            UserId: userData.id,
-            User: userData,
+            UserId: myData.id,
+            User: myData,
             ChannelId: channelData.id,
             Channel: channelData,
             createdAt: new Date(),
@@ -78,15 +78,15 @@ const ChannelPage = () => {
         await channelMutate();
       }
     },
-    [chat, channelData, userData, workspace, chatData, channel, channelMutate, setChat],
+    [chat, channelData, myData, workspace, chatData, channel, channelMutate, setChat],
   );
 
   const onMessage = useCallback(
     async (data: IChat) => {
       // id는 상대방 아이디
-      if (!userData) return;
+      if (!myData) return;
       //나의 채팅이 아닌경우만
-      if (data.Channel.name === channel && data.UserId !== userData.id) {
+      if (data.Channel.name === channel && data.UserId !== myData.id) {
         await chatMutate((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           return [[data, ...prevChatData[0]]];
@@ -104,7 +104,7 @@ const ChannelPage = () => {
         }
       }
     },
-    [userData, channel, chatMutate],
+    [myData, channel, chatMutate],
   );
 
   const inviteChannel = useCallback(() => {
@@ -136,7 +136,7 @@ const ChannelPage = () => {
 
   const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
-  if (!(userData && channelData)) {
+  if (!(myData && channelData)) {
     return null;
   }
 

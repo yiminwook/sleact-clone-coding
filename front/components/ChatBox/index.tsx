@@ -16,7 +16,7 @@ interface ChatBoxProps {
 
 const ChatBox = ({ chat, onSubmitForm, onChangeChat, placeholder = '' }: ChatBoxProps) => {
   const { workspace } = useParams<{ workspace: string }>();
-  const { data: userData } = useUser();
+  const { myData } = useUser();
   const { data: memberData = [] } = useMember(workspace);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);

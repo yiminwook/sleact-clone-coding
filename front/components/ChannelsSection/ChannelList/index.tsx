@@ -13,7 +13,7 @@ const ChannelList = () => {
 
   const location = useLocation();
 
-  const { data: userData } = useUser();
+  const { myData } = useUser();
 
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((pre) => !pre);
@@ -28,7 +28,7 @@ const ChannelList = () => {
     });
   }, []);
 
-  if (!userData) return null;
+  if (!myData) return null;
 
   return (
     <>

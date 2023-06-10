@@ -111,11 +111,11 @@ interface CollapseItemProps extends CollapseItemListProps {
 
 const CollapseItem = ({ member, onlineList, counList, onClickFunc }: CollapseItemProps) => {
   const { workspace } = useParams();
-  const { data: userData } = useUser();
+  const { myData } = useUser();
   const isOnline = onlineList.includes(member.id);
   // const count = counList[member.id] ?? 0;
 
-  if (!userData) return null;
+  if (!myData) return null;
 
   return (
     <NavLink
@@ -134,7 +134,7 @@ const CollapseItem = ({ member, onlineList, counList, onClickFunc }: CollapseIte
         data-qa-presence-dnd="false"
       />
       <span>{member.nickname}</span>
-      {member.id === userData.id && <span> (나)</span>}
+      {member.id === myData.id && <span> (나)</span>}
     </NavLink>
   );
 };

@@ -32,18 +32,18 @@ const Workspace = () => {
 
   const { workspace } = useParams<{ workspace: string }>();
 
-  const { data: userData, isLoading, mutate } = useUser();
+  const { myData, isLoadingMyData, mutateMyData } = useUser();
   const { data: channelData } = useChannel(workspace);
   const [socket, disconnect] = useSocket(workspace);
 
   const onSignOut = useCallback(async () => {
     try {
       await axios.post('/api/users/logout', null, { withCredentials: true });
-      mutate(false, false);
+      mutateMyData(false, false);
     } catch (error) {
       console.error(error);
     }
-  }, [mutate]);
+  }, [mutateMyData]);
 
   const onClickCreateChannel = useCallback(() => {
     setShowCreateChannelModal(() => true);
@@ -64,20 +64,20 @@ const Workspace = () => {
   }, []);
 
   useEffect(() => {
-    if (!(socket && channelData && userData)) return;
-    socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
-  }, [socket, channelData, userData, disconnect]);
+    if (!(socket && channelData && myData)) return;
+    socket.emit('login', { id: myData.id, channels: channelData.map((v) => v.id) });
+  }, [socket, channelData, myData, disconnect]);
 
   useEffect(() => {
     return () => disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace, disconnect]);
 
-  if (isLoading) {
+  if (isLoadingMyData) {
     return <div>로딩중...</div>;
   }
 
-  if (!userData) {
+  if (!myData) {
     return <Navigate to="/signin" replace />;
   }
 
@@ -90,7 +90,7 @@ const Workspace = () => {
       </Header>
       <WorkspaceWrapper>
         <Workspaces>
-          {userData.Workspaces.map((ws) => {
+          {myData.Workspaces.map((ws) => {
             return (
               <Link key={ws.id} to={`/workspace/${ws.url}/channel/일반`}>
                 <WorkspaceButton>{ws.name[0].toUpperCase()}</WorkspaceButton>

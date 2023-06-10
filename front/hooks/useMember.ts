@@ -5,7 +5,7 @@ import { IUser } from '@typings/db';
 
 /** :workspace 내부의 멤버 목록을 가져옴 */
 const useMember = (workspace: string | undefined) => {
-  const { data: userData } = useUser();
+  const { myData } = useUser();
 
   const options = {
     dedupingInterval: 60 * 60 * 1000,
@@ -14,7 +14,7 @@ const useMember = (workspace: string | undefined) => {
   };
 
   const { data, mutate, isLoading, error } = useSWR<IUser[]>(
-    userData ? `/api/workspaces/${workspace}/members` : null,
+    myData ? `/api/workspaces/${workspace}/members` : null,
     fetcher,
     options,
   );

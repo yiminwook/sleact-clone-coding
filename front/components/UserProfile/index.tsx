@@ -11,23 +11,23 @@ interface UserProfileProps {
 const UserProfile = ({ onSignOut }: UserProfileProps) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const { data: userData } = useUser();
+  const { myData } = useUser();
 
   const toggleUserProfile = useCallback((e: MouseEvent) => {
     e.stopPropagation();
     setShowUserMenu((pre) => !pre);
   }, []);
 
-  if (!userData) return null;
+  if (!myData) return null;
 
   return (
     <span onClick={toggleUserProfile}>
-      <ProfileImg src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
+      <ProfileImg src={gravatar.url(myData.email, { s: '28px', d: 'retro' })} alt={myData.nickname} />
       <Menu show={showUserMenu} onCloseMenu={toggleUserProfile} style={{ right: 0, top: 38 }}>
         <ProfileModal>
-          <img src={gravatar.url(userData.email, { s: '28px', d: 'retro' })} alt={userData.nickname} />
+          <img src={gravatar.url(myData.email, { s: '28px', d: 'retro' })} alt={myData.nickname} />
           <div>
-            <span id="profile-name">{userData.nickname}</span>
+            <span id="profile-name">{myData.nickname}</span>
             <span id="profile-active">Active</span>
           </div>
         </ProfileModal>

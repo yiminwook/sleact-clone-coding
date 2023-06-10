@@ -18,7 +18,7 @@ import { IDM } from '@typings/db';
 const DirectMessage = () => {
   //id는 상대방
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
-  const { data: userData } = useUser();
+  const { myData } = useUser();
   const { data: dmData } = useDM({ workspace, id });
   const { data: chatData, mutate: chatMutate, setSize, isLoading } = useChat({ workspace, id });
   const [socket] = useSocket(workspace);
@@ -32,7 +32,7 @@ const DirectMessage = () => {
     async (e: FormEvent | KeyboardEvent) => {
       e.preventDefault();
       const savedChat = chat?.trim();
-      if (!(savedChat && chatData && userData && dmData)) return;
+      if (!(savedChat && chatData && myData && dmData)) return;
 
       try {
         await chatMutate((prevChatData) => {
@@ -40,8 +40,8 @@ const DirectMessage = () => {
           const data: IDM = {
             id: (chatData[0][0]?.id || 0) + 1,
             content: savedChat,
-            SenderId: userData.id,
-            Sender: userData,
+            SenderId: myData.id,
+            Sender: myData,
             ReceiverId: dmData.id,
             Receiver: dmData,
             createdAt: new Date(),
@@ -63,15 +63,15 @@ const DirectMessage = () => {
         await chatMutate();
       }
     },
-    [chat, chatData, userData, dmData, workspace, id, chatMutate, setChat],
+    [chat, chatData, myData, dmData, workspace, id, chatMutate, setChat],
   );
 
   const onMessage = useCallback(
     async (data: IDM) => {
       // id는 상대방 아이디
-      if (!userData) return;
+      if (!myData) return;
       //나의 채팅이 아닌경우만
-      if (data.SenderId === Number(id) && userData.id !== Number(id)) {
+      if (data.SenderId === Number(id) && myData.id !== Number(id)) {
         await chatMutate((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           return [[data, ...prevChatData[0]]];
@@ -89,7 +89,7 @@ const DirectMessage = () => {
         }
       }
     },
-    [userData, id, chatMutate, chatData],
+    [myData, id, chatMutate, chatData],
   );
 
   useEffect(() => {
@@ -113,12 +113,12 @@ const DirectMessage = () => {
 
   const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
-  if (!(userData && dmData)) {
+  if (!(myData && dmData)) {
     return null;
   }
 
   return (
-    <Container>
+    <Container onDrop={() => {}} onDragOver={() => {}}>
       <Header>
         <img src={gravatar.url(dmData.email, { s: '24px', d: 'retro' })} alt={dmData.nickname} />
         <span>{dmData.nickname}</span>

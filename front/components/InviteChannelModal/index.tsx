@@ -19,10 +19,10 @@ const InviteChannelModal = ({ show, onCloseModal }: InviteChannelModalProps) => 
   const [newMember, onChangeNewMember, setNewMember] = useInput('');
 
   const { workspace, channel } = useParams();
-  const { data: userData } = useUser();
+  const { myData } = useUser();
 
   const { mutate } = useSWR<IUser[]>(
-    userData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null,
+    myData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null,
     fetcher,
   );
 
