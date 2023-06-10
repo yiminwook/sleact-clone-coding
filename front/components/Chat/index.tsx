@@ -34,7 +34,7 @@ const Chat = ({ data }: ChatProps) => {
             );
           }
 
-          return <br key={index} />; //줄바꿈 처리
+          return <br key={`${user.nickname}-br-${index}`} />; //줄바꿈 처리
         },
       })
     );

@@ -95,6 +95,7 @@ export const Channels = styled.nav`
     color: white;
     font-weight: bold;
   }
+  //안읽은 채팅수
   & .count {
     margin-left: auto;
     background: #cd2553;

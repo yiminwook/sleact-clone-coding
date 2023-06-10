@@ -1,19 +1,18 @@
-import useChannel from '@hooks/useChannel';
 import useUser from '@hooks/useUser';
 import { IChannel } from '@typings/db';
 import React, { useCallback, useState } from 'react';
-import { useLocation } from 'react-router';
 import { useParams } from 'react-router';
-import { NavLink } from 'react-router-dom';
 import { CollapseButton } from '@components/ChannelsSection/DMList/styles';
+import useSWR from 'swr';
+import fetcher from '@hooks/fetcher';
+import EachChannel from '@components/EachChannel';
 
 const ChannelList = () => {
   const [channelCollapse, setChannelCollapse] = useState(false);
   const [countList, setCountList] = useState<Record<string, number | undefined>>({});
-
-  const location = useLocation();
-
   const { myData } = useUser();
+  const { workspace } = useParams<{ workspace: string }>();
+  const { data: channelData } = useSWR<IChannel[]>(myData ? `/api/workspaces/${workspace}/channels` : null, fetcher);
 
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((pre) => !pre);
@@ -42,42 +41,11 @@ const ChannelList = () => {
         </CollapseButton>
         <span>Channels</span>
       </h2>
-      {!channelCollapse ? <CollapseItemList /> : null}
+      {!channelCollapse
+        ? channelData?.map((channel) => <EachChannel key={`eachChannel-${channel.name}`} channel={channel} />)
+        : null}
     </>
   );
 };
 
 export default ChannelList;
-
-interface CollapseItemListProps {}
-
-const CollapseItemList = ({}: CollapseItemListProps) => {
-  const { workspace } = useParams();
-  const { data: channelData } = useChannel(workspace);
-
-  if (!channelData) return null;
-
-  return (
-    <>
-      {channelData.map((channel) => (
-        <CollapseItem key={channel.id} channel={channel} />
-      ))}
-    </>
-  );
-};
-
-interface CollapseItemProps {
-  channel: IChannel;
-}
-
-const CollapseItem = ({ channel }: CollapseItemProps) => {
-  const { workspace } = useParams();
-  return (
-    <NavLink
-      className={({ isActive }) => (isActive === true ? 'selected' : '')}
-      to={`/workspace/${workspace}/channel/${channel.name}`}
-    >
-      <span># {channel.name}</span>
-    </NavLink>
-  );
-};

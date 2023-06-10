@@ -1,46 +1,32 @@
-import useMember from '@hooks/useMember';
 import useUser from '@hooks/useUser';
-import { IDM, IUser } from '@typings/db';
+import { IUserWithOnline } from '@typings/db';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import { NavLink } from 'react-router-dom';
 import { CollapseButton } from '@components/ChannelsSection/DMList/styles';
 import useSocket from '@hooks/useSocket';
+import fetcher from '@hooks/fetcher';
+import useSWR from 'swr';
+import EachDm from '@components/EachDm';
 
 const DMList = () => {
   const { workspace } = useParams();
 
   const [channelCollapse, setChannelCollapse] = useState(false);
-  const [countList, setCountList] = useState<Record<string, number>>({});
   const [onlineList, setOnlineList] = useState<number[]>([]);
-  const [socket, disconnect] = useSocket(workspace);
+  const [socket] = useSocket(workspace);
+  const { myData } = useUser();
+
+  const { data: memberData } = useSWR<IUserWithOnline[]>(
+    myData ? `/api/workspaces/${workspace}/members` : null,
+    fetcher,
+  );
 
   const toggleChannelCollapse = useCallback(() => {
     setChannelCollapse((pre) => !pre);
   }, []);
 
-  const resetCount = useCallback((id: number) => {
-    setCountList((list) => {
-      return {
-        ...list,
-        [id]: 0,
-      };
-    });
-  }, []);
-
-  const onMessage = (data: IDM) => {
-    setCountList((list) => {
-      let count = list[data.SenderId] ?? 0;
-      return {
-        ...list,
-        [data.SenderId]: count + 1,
-      };
-    });
-  };
-
   useEffect(() => {
     setOnlineList(() => []);
-    // setCountList(() => ({}));
   }, [workspace]);
 
   useEffect(() => {
@@ -48,11 +34,7 @@ const DMList = () => {
     socket.on('onlineList', (data: number[]) => {
       setOnlineList(() => data);
     });
-    // socket.on('dm', onMessage);
-    // console.log('socket on dm', socket.hasListeners('dm'), socket);
     return () => {
-      // socket.off('dm', onMessage);
-      // console.log('socket off dm', socket.hasListeners('dm'));
       socket.off('onlineList');
     };
   }, [socket]);
@@ -69,72 +51,14 @@ const DMList = () => {
         </CollapseButton>
         <span>Direct Messages</span>
       </h2>
-      {!channelCollapse ? (
-        <CollapseItemList onlineList={onlineList} counList={countList} onClickFunc={resetCount} />
-      ) : null}
+      {!channelCollapse
+        ? memberData?.map((member) => {
+            const isOnline = onlineList.includes(member.id);
+            return <EachDm key={`eachDm-${member.id}`} member={member} isOnline={isOnline} />;
+          })
+        : null}
     </>
   );
 };
 
 export default DMList;
-
-interface CollapseItemListProps {
-  onlineList: number[];
-  counList: Record<string, number>;
-  onClickFunc: (id: number) => void;
-}
-
-const CollapseItemList = ({ onlineList, counList, onClickFunc }: CollapseItemListProps) => {
-  const { workspace } = useParams();
-  const { data: memberData } = useMember(workspace);
-
-  if (!memberData) return null;
-
-  return (
-    <>
-      {memberData.map((member) => (
-        <CollapseItem
-          key={member.id}
-          member={member}
-          onlineList={onlineList}
-          counList={counList}
-          onClickFunc={onClickFunc}
-        />
-      ))}
-    </>
-  );
-};
-
-interface CollapseItemProps extends CollapseItemListProps {
-  member: IUser;
-}
-
-const CollapseItem = ({ member, onlineList, counList, onClickFunc }: CollapseItemProps) => {
-  const { workspace } = useParams();
-  const { myData } = useUser();
-  const isOnline = onlineList.includes(member.id);
-  // const count = counList[member.id] ?? 0;
-
-  if (!myData) return null;
-
-  return (
-    <NavLink
-      className={({ isActive }) => (isActive === true ? 'selected' : '')}
-      to={`/workspace/${workspace}/dm/${member.id}`}
-      onClick={() => onClickFunc(member.id)}
-    >
-      <i
-        className={`c-icon p-channel_sidebar__presence_icon p-channel_sidebar__presence_icon--dim_enabled c-presence ${
-          isOnline ? 'c-presence--active c-icon--presence-online' : 'c-icon--presence-offline'
-        }`}
-        aria-hidden="true"
-        data-qa="presence_indicator"
-        data-qa-presence-self="false"
-        data-qa-presence-active="false"
-        data-qa-presence-dnd="false"
-      />
-      <span>{member.nickname}</span>
-      {member.id === myData.id && <span> (나)</span>}
-    </NavLink>
-  );
-};

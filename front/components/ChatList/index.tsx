@@ -37,12 +37,12 @@ const ChatList: ForwardRefRenderFunction<Scrollbars, ChatListProps> = (
     <ChatZone>
       <Scrollbars autoHide ref={scrollbarRef} onScrollFrame={onScroll}>
         {Object.entries(chatListData).map(([monthDay, chatData]) => (
-          <Section key={monthDay} className={`section-${monthDay}`}>
+          <Section key={`chatListSeaction-${monthDay}`} className={`section-${monthDay}`}>
             <StickyHeader>
               <button>{monthDay}</button>
             </StickyHeader>
             {chatData.map((chat) => (
-              <Chat key={chat.id} data={chat} />
+              <Chat key={`chat-${chat.id}-${chat.createdAt}`} data={chat} />
             ))}
           </Section>
         ))}

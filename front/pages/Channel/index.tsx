@@ -180,6 +180,12 @@ const ChannelPage = () => {
     return () => clearTimeout(timer);
   }, [channel, isLoading]);
 
+  useEffect(() => {
+    //로컬스토리지에 시간을 기록
+    console.log(new Date().getTime());
+    localStorage.setItem(`${workspace}-${channel}`, new Date().getTime().toString());
+  }, [workspace, channel, chatData]);
+
   const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
   if (!(myData && channelData)) {

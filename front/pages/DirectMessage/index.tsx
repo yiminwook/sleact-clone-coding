@@ -151,6 +151,11 @@ const DirectMessage = () => {
     return () => clearTimeout(timer);
   }, [id, isLoading]);
 
+  useEffect(() => {
+    //로컬스토리지에 시간을 기록
+    localStorage.setItem(`${workspace}-${id}`, new Date().getTime().toString());
+  }, [workspace, id, chatData]);
+
   const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
   if (!(myData && dmData)) {

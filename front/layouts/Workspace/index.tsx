@@ -92,7 +92,7 @@ const Workspace = () => {
         <Workspaces>
           {myData.Workspaces.map((ws) => {
             return (
-              <Link key={ws.id} to={`/workspace/${ws.url}/channel/일반`}>
+              <Link key={`workspaces-${ws.id}`} to={`/workspace/${ws.url}/channel/일반`}>
                 <WorkspaceButton>{ws.name[0].toUpperCase()}</WorkspaceButton>
               </Link>
             );
