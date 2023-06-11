@@ -4,18 +4,22 @@ import { Link, Navigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
 import { Header, Label, Form, Input, LinkContainer, Button, Error, Success } from '@components/common/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
-import useUser from '@hooks/useUser';
+import { useMydata } from '@hooks/useApi';
 
 const SignUpPage = () => {
   const [email, onChangeEmail] = useInput('');
   const [nickname, onChangeNickname] = useInput('');
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
+
+  //비밀번호가 일치하는지 여부
   const [misMatchErr, setMisMatchErr] = useState(false);
+  //axios Error, 에러메세지를 toast로 출력
   const [signUpErrMsg, setSignupErrMsg] = useState('');
+  //회원가입 성공시 문구출력
   const [signUpSuccess, setSignupSuccess] = useState(false);
 
-  const { myData } = useUser();
+  const { myData } = useMydata();
 
   const onChangePassoword = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,10 +55,11 @@ const SignUpPage = () => {
         }
       }
     },
-    [email, nickname, password, passwordCheck],
+    [email, nickname, password, misMatchErr],
   );
 
   if (myData) {
+    //로그인 되어있으면 일반채널로
     return <Navigate to="/workspace/sleact/channel/일반" />;
   }
 

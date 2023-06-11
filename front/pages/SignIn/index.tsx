@@ -4,14 +4,14 @@ import React, { FormEvent, useCallback, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Header, Label, Form, Input, LinkContainer, Button, Error } from '@components/common/styles';
 import getAxiosErrMsg from '@utils/getAxiosErrMsg';
-import useUser from '@hooks/useUser';
 import { IUser } from '@typings/db';
+import { useMydata } from '@hooks/useApi';
 
 const SignInPage = () => {
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
   const [signInErrMsg, setSignInErrMsg] = useState('');
-  const { myData, mutateMyData, isLoadingMyData } = useUser();
+  const { myData, mutateMyData, isLoadingMyData } = useMydata();
 
   const onSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
@@ -38,6 +38,7 @@ const SignInPage = () => {
   }
 
   if (myData && typeof myData === 'object') {
+    //이미 회원가입되었으면 일반채널로 이동
     return <Navigate to="/workspace/sleact/channel/일반" replace />;
   }
 

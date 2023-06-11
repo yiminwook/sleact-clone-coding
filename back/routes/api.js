@@ -334,6 +334,7 @@ router.post(
   isLoggedIn,
   upload.array("image"),
   async (req, res, next) => {
+    console.log(req.files);
     try {
       const workspace = await Workspace.findOne({
         where: { url: req.params.workspace },

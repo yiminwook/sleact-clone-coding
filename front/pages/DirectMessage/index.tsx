@@ -3,25 +3,23 @@ import React, { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, u
 import { Header, Container, DragOver } from '@pages/DirectMessage/styles';
 import gravatar from 'gravatar';
 import { useParams } from 'react-router';
-import useUser from '@hooks/useUser';
-import ChatBox from '@components/ChatBox';
-import ChatList from '@components/ChatList';
+import ChatBox from '@components/common/ChatBox';
+import ChatList from '@components/common/ChatList';
 import useInput from '@hooks/useInput';
 import axios from 'axios';
-import useDM from '@hooks/useDM';
-import useChat from '@hooks/useChat';
 import { sortChatList } from '@utils/sortChatList';
 import Scrollbars from 'react-custom-scrollbars';
 import useSocket from '@hooks/useSocket';
 import { IDM } from '@typings/db';
+import { useInfiniteDmChat, useDmUser, useMydata } from '@hooks/useApi';
 
 const DirectMessage = () => {
   //id는 상대방
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
-  const { myData } = useUser();
-  const { data: dmData } = useDM({ workspace, id });
-  const { data: chatData, mutate: chatMutate, setSize, isLoading } = useChat({ workspace, id });
-  const [socket] = useSocket(workspace);
+  const { myData } = useMydata();
+  const { dmUserData } = useDmUser();
+  const { chatData, mutateDmChatData, isLoadingDmChatData, setSizeDmChatData } = useInfiniteDmChat();
+  const [socket] = useSocket();
   const isEmpty = chatData?.[0]?.length === 0;
   const isReachedEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
 
@@ -34,18 +32,18 @@ const DirectMessage = () => {
     async (e: FormEvent | KeyboardEvent) => {
       e.preventDefault();
       const savedChat = chat?.trim();
-      if (!(savedChat && chatData && myData && dmData)) return;
+      if (!(savedChat && chatData && myData && dmUserData)) return;
 
       try {
-        await chatMutate((prevChatData) => {
+        await mutateDmChatData((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           const data: IDM = {
             id: (chatData[0][0]?.id || 0) + 1,
             content: savedChat,
             SenderId: myData.id,
             Sender: myData,
-            ReceiverId: dmData.id,
-            Receiver: dmData,
+            ReceiverId: dmUserData.id,
+            Receiver: dmUserData,
             createdAt: new Date(),
           };
           return [[data, ...prevChatData[0]]];
@@ -62,10 +60,10 @@ const DirectMessage = () => {
       } catch (error) {
         console.error(error);
       } finally {
-        await chatMutate();
+        await mutateDmChatData();
       }
     },
-    [chat, chatData, myData, dmData, workspace, id, chatMutate, setChat],
+    [chat, chatData, myData, dmUserData, workspace, id, mutateDmChatData, setChat],
   );
 
   const onMessage = useCallback(
@@ -74,7 +72,7 @@ const DirectMessage = () => {
       if (!myData) return;
       //나의 채팅이 아닌경우만
       if (data.SenderId === Number(id) && myData.id !== Number(id)) {
-        await chatMutate((prevChatData) => {
+        await mutateDmChatData((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           return [[data, ...prevChatData[0]]];
         }, false);
@@ -91,7 +89,7 @@ const DirectMessage = () => {
         }
       }
     },
-    [myData, id, chatMutate, chatData],
+    [myData, id, mutateDmChatData, chatData],
   );
 
   const onDragOver = useCallback(
@@ -108,9 +106,8 @@ const DirectMessage = () => {
     (e: DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log(e.target === dragRef.current);
-      console.log(dragRef.current, e.target);
       if (dragRef.current === e.target) {
+        //dragOver가 타겟일때만 닫히게
         setIsDragOver(() => false);
       }
     },
@@ -141,7 +138,7 @@ const DirectMessage = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      await chatMutate();
+      await mutateDmChatData();
       scrollbarRef.current?.scrollToBottom();
       setIsDragOver(() => false);
     }
@@ -163,7 +160,7 @@ const DirectMessage = () => {
       scrollbarRef.current?.scrollToBottom();
     }, 100);
     return () => clearTimeout(timer);
-  }, [id, isLoading]);
+  }, [id, isLoadingDmChatData]);
 
   useEffect(() => {
     //로컬스토리지에 시간을 기록
@@ -172,17 +169,22 @@ const DirectMessage = () => {
 
   const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
 
-  if (!(myData && dmData)) {
+  if (!(myData && dmUserData)) {
     return null;
   }
 
   return (
     <Container onDrop={onDragDrop} onDragOver={onDragOver} onDragLeave={onDragLeave}>
       <Header>
-        <img src={gravatar.url(dmData.email, { s: '24px', d: 'retro' })} alt={dmData.nickname} />
-        <span>{dmData.nickname}</span>
+        <img src={gravatar.url(dmUserData.email, { s: '24px', d: 'retro' })} alt={dmUserData.nickname} />
+        <span>{dmUserData.nickname}</span>
       </Header>
-      <ChatList chatListData={chatListData} ref={scrollbarRef} isEmpty={isEmpty} isReachingEnd={isReachedEnd} />
+      <ChatList
+        chatListData={chatListData}
+        ref={scrollbarRef}
+        isReachingEnd={isReachedEnd}
+        setSize={setSizeDmChatData}
+      />
       <ChatBox chat={chat} onSubmitForm={onSubmitForm} onChangeChat={onChangeChat} />
       {isDragOver ? <DragOver ref={dragRef}>업로드</DragOver> : null}
     </Container>

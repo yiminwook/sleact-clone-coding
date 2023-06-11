@@ -1,42 +1,37 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, DragOver, Header } from '@pages/Channel/styles';
 import { useParams } from 'react-router';
-import ChatList from '@components/ChatList';
-import ChatBox from '@components/ChatBox';
-import useSWR from 'swr';
-import { IChannel, IUser, IChat } from '@typings/db';
-import fetcher from '@hooks/fetcher';
-import useUser from '@hooks/useUser';
+import ChatList from '@components/common/ChatList';
+import ChatBox from '@components/common/ChatBox';
+import { IChat } from '@typings/db';
 import useSocket from '@hooks/useSocket';
 import useInput from '@hooks/useInput';
 import Scrollbars from 'react-custom-scrollbars';
 import axios from 'axios';
-import useSWRInfinite from 'swr/infinite';
-import InviteChannelModal from '@components/InviteChannelModal';
+import InviteChannelModal from '@components/Workspace/Channel/InviteChannelModal';
 import { sortChatList } from '@utils/sortChatList';
+import {
+  useInifiteChannelChat,
+  useMydata,
+  useWorkspaceChannelData,
+  useWorkspaceChannelMemberList,
+} from '@hooks/useApi';
 
 const ChannelPage = () => {
   const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
   const { workspace, channel } = useParams<{ workspace: string; channel: string }>();
-  const { myData } = useUser();
-  const { data: channelData } = useSWR<IChannel>(`/api/workspaces/${workspace}/channels/${channel}`, fetcher);
-  const {
-    data: chatData,
-    mutate: chatMutate,
-    setSize,
-  } = useSWRInfinite<IChat[]>(
-    (index) => `/api/workspaces/${workspace}/channels/${channel}/chats?perPage=20&page=${index + 1}`,
-    fetcher,
-  );
-  const {
-    data: channelMembersData,
-    mutate: channelMutate,
-    isLoading,
-  } = useSWR<IUser[]>(myData ? `/api/workspaces/${workspace}/channels/${channel}/members` : null, fetcher);
+  const { myData } = useMydata();
+  const { workspaceChannelData } = useWorkspaceChannelData();
+  const { channelChatData, mutateChannelChatData, isLoadingChannelChatData, setSizeChannelChatData } =
+    useInifiteChannelChat();
 
-  const [socket] = useSocket(workspace);
-  const isEmpty = chatData?.[0]?.length === 0;
-  const isReachedEnd = isEmpty || (chatData && chatData[chatData.length - 1]?.length < 20) || false;
+  const { workspaceChannelMemeberList } = useWorkspaceChannelMemberList();
+
+  const [socket] = useSocket();
+  const isEmpty = channelChatData?.[0]?.length === 0;
+  const isReachedEnd =
+    isEmpty || (channelChatData && channelChatData[channelChatData.length - 1]?.length < 20) || false;
 
   const [chat, onChangeChat, setChat] = useInput('');
   const scrollbarRef = useRef<Scrollbars>(null);
@@ -47,18 +42,18 @@ const ChannelPage = () => {
     async (e: FormEvent | KeyboardEvent) => {
       e.preventDefault();
       const savedChat = chat?.trim();
-      if (!(savedChat && chatData && myData && channelData)) return;
+      if (!(savedChat && channelChatData && myData && workspaceChannelData)) return;
 
       try {
-        await chatMutate((prevChatData) => {
+        await mutateChannelChatData((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           const data: IChat = {
-            id: (chatData[0][0]?.id || 0) + 1,
+            id: (channelChatData[0][0]?.id || 0) + 1,
             content: savedChat,
             UserId: myData.id,
             User: myData,
-            ChannelId: channelData.id,
-            Channel: channelData,
+            ChannelId: workspaceChannelData.id,
+            Channel: workspaceChannelData,
             createdAt: new Date(),
           };
           return [[data, ...prevChatData[0]]];
@@ -77,10 +72,10 @@ const ChannelPage = () => {
       } catch (error) {
         console.error(error);
       } finally {
-        await channelMutate();
+        await mutateChannelChatData();
       }
     },
-    [chat, channelData, myData, workspace, chatData, channel, channelMutate, setChat],
+    [chat, workspaceChannelData, myData, workspace, channelChatData, channel, mutateChannelChatData, setChat],
   );
 
   const onMessage = useCallback(
@@ -94,7 +89,7 @@ const ChannelPage = () => {
         data.UserId !== myData.id
       ) {
         //  내가 보낸 이미지는 optimistic ui 적용x
-        await chatMutate((prevChatData) => {
+        await mutateChannelChatData((prevChatData) => {
           if (prevChatData === undefined || prevChatData.length <= 0) return prevChatData;
           return [[data, ...prevChatData[0]]];
         }, false);
@@ -111,7 +106,7 @@ const ChannelPage = () => {
         }
       }
     },
-    [myData, channel, chatMutate],
+    [myData, channel, channelChatData],
   );
 
   const onDragOver = useCallback(
@@ -128,9 +123,8 @@ const ChannelPage = () => {
     (e: DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log(e.target === dragRef.current);
-      console.log(dragRef.current, e.target);
       if (dragRef.current === e.target) {
+        //dragOver가 타겟일때만 닫히게
         setIsDragOver(() => false);
       }
     },
@@ -161,7 +155,7 @@ const ChannelPage = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      await chatMutate();
+      await mutateChannelChatData();
       scrollbarRef.current?.scrollToBottom();
       setIsDragOver(() => false);
     }
@@ -184,25 +178,23 @@ const ChannelPage = () => {
     };
   }, [socket, onMessage]);
 
-  //첫화면에서 스크롤바 제일 아래로
   useEffect(() => {
-    if (!chatData || chatData.length <= 0) return;
-    console.log('스크롤바 아래로');
+    //첫화면에서 스크롤바 제일 아래로
+    if (!channelChatData || channelChatData.length <= 0) return;
     const timer = setTimeout(() => {
       scrollbarRef.current?.scrollToBottom();
     }, 100);
     return () => clearTimeout(timer);
-  }, [channel, isLoading]);
+  }, [channel, isLoadingChannelChatData]);
 
   useEffect(() => {
     //로컬스토리지에 시간을 기록
-    console.log(new Date().getTime());
     localStorage.setItem(`${workspace}-${channel}`, new Date().getTime().toString());
-  }, [workspace, channel, chatData]);
+  }, [workspace, channel, channelChatData]);
 
-  const chatListData = useMemo(() => sortChatList(chatData), [chatData]);
+  const chatListData = useMemo(() => sortChatList(channelChatData), [channelChatData]);
 
-  if (!(myData && channelData)) {
+  if (!(myData && workspaceChannelData)) {
     return null;
   }
 
@@ -211,7 +203,7 @@ const ChannelPage = () => {
       <Header>
         <span>#{channel}</span>
         <div className="header-right">
-          <span>{channelMembersData?.length}</span>
+          <span>{workspaceChannelMemeberList?.length}</span>
           <button
             onClick={inviteChannel}
             className="c-button-unstyled p-ia__view_header__button"
@@ -223,7 +215,12 @@ const ChannelPage = () => {
           </button>
         </div>
       </Header>
-      <ChatList chatListData={chatListData} ref={scrollbarRef} isEmpty={isEmpty} isReachingEnd={isReachedEnd} />
+      <ChatList
+        chatListData={chatListData}
+        ref={scrollbarRef}
+        isReachingEnd={isReachedEnd}
+        setSize={setSizeChannelChatData}
+      />
       <ChatBox chat={chat} onSubmitForm={onSubmitForm} onChangeChat={onChangeChat} />
       <InviteChannelModal show={showInviteChannelModal} onCloseModal={onCloseModal} />
       {isDragOver ? <DragOver ref={dragRef}>업로드</DragOver> : null}

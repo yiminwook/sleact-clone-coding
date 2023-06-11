@@ -5,10 +5,6 @@ export interface IUser {
   Workspaces: IWorkspace[];
 }
 
-export interface IUserWithOnline extends IUser {
-  online: boolean;
-}
-
 export interface IChannel {
   id: number;
   name: string;

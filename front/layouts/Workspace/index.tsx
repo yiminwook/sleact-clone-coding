@@ -1,4 +1,3 @@
-import useUser from '@hooks/useUser';
 import {
   AddButton,
   Chats,
@@ -12,15 +11,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import loadable from '@loadable/component';
 import { Link } from 'react-router-dom';
-import CreateWorkspaceModal from '@components/CreateWorkspaceModal';
-import UserProfile from '@components/UserProfile';
+import CreateWorkspaceModal from '@components/Workspace/CreateWorkspaceModal';
+import UserProfile from '@components/common/UserProfile';
 import axios from 'axios';
-import ChannelsSection from '@components/ChannelsSection';
-import CreateChannelModal from '@components/CreateChannelModal';
-import InviteWorkspaceModal from '@components/InviteWorkspaceModal';
+import ChannelsSection from '@components/Workspace/ChannelsSection';
+import CreateChannelModal from '@components/Workspace/CreateChannelModal';
+import InviteWorkspaceModal from '@components/Workspace/InviteWorkspaceModal';
 import { useParams } from 'react-router';
 import useSocket from '@hooks/useSocket';
-import useChannel from '@hooks/useChannel';
+import { useWorkspaceChannelList, useMydata } from '@hooks/useApi';
 
 const ChannelPage = loadable(() => import('@pages/Channel'));
 const DirectMessage = loadable(() => import('@pages/DirectMessage'));
@@ -32,13 +31,13 @@ const Workspace = () => {
 
   const { workspace } = useParams<{ workspace: string }>();
 
-  const { myData, isLoadingMyData, mutateMyData } = useUser();
-  const { data: channelData } = useChannel(workspace);
-  const [socket, disconnect] = useSocket(workspace);
+  const { myData, isLoadingMyData, mutateMyData } = useMydata();
+  const { workspaceChannelList } = useWorkspaceChannelList();
+  const [socket, disconnect] = useSocket();
 
   const onSignOut = useCallback(async () => {
     try {
-      await axios.post('/api/users/logout', null, { withCredentials: true });
+      await axios.post('/api/users/logout');
       mutateMyData(false, false);
     } catch (error) {
       console.error(error);
@@ -64,13 +63,13 @@ const Workspace = () => {
   }, []);
 
   useEffect(() => {
-    if (!(socket && channelData && myData)) return;
-    socket.emit('login', { id: myData.id, channels: channelData.map((v) => v.id) });
-  }, [socket, channelData, myData, disconnect]);
+    if (!(socket && workspaceChannelList && myData)) return;
+    //on 콜백함수, emit 문자열
+    socket.emit('login', { id: myData.id, channels: workspaceChannelList.map((v) => v.id) });
+  }, [socket, workspaceChannelList, myData, disconnect]);
 
   useEffect(() => {
     return () => disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace, disconnect]);
 
   if (isLoadingMyData) {
@@ -78,6 +77,7 @@ const Workspace = () => {
   }
 
   if (!myData) {
+    //로그인되어있지 않으면 로그인페이지로
     return <Navigate to="/signin" replace />;
   }
 
